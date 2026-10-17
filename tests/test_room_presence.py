@@ -211,6 +211,35 @@ def test_id_command_is_routed_before_master_only_management_gate():
     assert calls == [("Hall", "ايدي", "RegularMember", False)]
 
 
+def test_la_command_is_routed_before_master_only_management_gate():
+    bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
+    calls = []
+    bot._room_list_commands = lambda room, text, sender, is_private: calls.append(
+        (room, text, sender, is_private)
+    ) or True
+
+    assert bot._handle_management_command("Hall", "la@سوريانا", "RegularMember", is_private=False)
+    assert calls == [("Hall", "la@سوريانا", "RegularMember", False)]
+
+
+def test_shop_and_purchase_commands_pass_for_regular_members():
+    import threading
+    bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
+    bot._room_list_commands = lambda *_args, **_kwargs: False
+    bot._pending_named_commands = {}
+    bot._pending_protection_number = {}
+    bot._master_reply_local = threading.local()
+    calls = []
+    bot._handle_management_command_impl = lambda room, body, sender, is_private=False: calls.append(
+        (room, body, sender, is_private)
+    ) or True
+    bot._remember_bot_action = lambda *_args, **_kwargs: None
+
+    assert bot._handle_management_command("Hall", "store", "RegularMember", is_private=False)
+    assert bot._handle_management_command("Hall", "sby 1", "RegularMember", is_private=False)
+    assert [call[1] for call in calls] == ["store", "sby 1"]
+
+
 def test_stored_user_id_looks_up_case_insensitively_across_rooms():
     with patch.object(bot_module, "_persistent_rosters", return_value={
         "version": 1,

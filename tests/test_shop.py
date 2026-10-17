@@ -43,3 +43,41 @@ def test_shop_catalog_fits_talkin_message_limit():
     assert len(packet) <= 1008
     assert "sby 1 إلى sby 6" in text
     assert "ترحيب_صورة" in text
+
+
+def test_every_shop_item_can_be_activated_in_isolated_store(tmp_path, monkeypatch):
+    monkeypatch.setattr(shop, "SHOP_PATH", tmp_path / "shop.json")
+    for item_id, item in shop.ITEMS.items():
+        ok, error = shop.purchase("Tester", item_id, "Test Room")
+        assert ok and not error, (item_id, error)
+        if item["kind"].startswith("room_"):
+            assert shop.active(item["kind"], room="Test Room")
+        else:
+            assert shop.active(item["kind"], username="Tester")
+
+
+def test_regular_member_can_buy_and_activate_all_items_via_sby(tmp_path, monkeypatch):
+    import threading
+
+    monkeypatch.setattr(shop, "SHOP_PATH", tmp_path / "shop.json")
+    monkeypatch.setattr(bot_module, "_resolve_points_account", lambda *_args: ("tester", {}))
+    monkeypatch.setattr(bot_module, "_points_balance", lambda _account: 10**12)
+    monkeypatch.setattr(bot_module, "_add_points", lambda *_args: True)
+    monkeypatch.setattr(bot_module, "_github_sync_after_local_save", lambda *_args: None)
+
+    bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
+    bot._room_list_commands = lambda *_args, **_kwargs: False
+    bot._pending_named_commands = {}
+    bot._pending_protection_number = {}
+    bot._master_reply_local = threading.local()
+    bot._remember_bot_action = lambda *_args, **_kwargs: None
+    bot.send_private_text = lambda *_args, **_kwargs: True
+
+    for item_id, item in shop.ITEMS.items():
+        assert bot._handle_management_command(
+            "Test Room", f"sby {item_id}", "RegularMember", is_private=False
+        )
+        if item["kind"].startswith("room_"):
+            assert shop.active(item["kind"], room="Test Room")
+        else:
+            assert shop.active(item["kind"], username="RegularMember")

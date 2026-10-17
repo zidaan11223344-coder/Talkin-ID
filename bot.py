@@ -17200,6 +17200,9 @@ class TalkinBot:
         # management gate so any member can retrieve their own server ID.
         if re.fullmatch(r"(?:ايدي|أيدي|id)(?:@(.+))?", _body_text, re.I):
             return self._room_list_commands(room, _body_text, sender, is_private)
+        # Live room presence is also a public utility, not a management action.
+        if re.fullmatch(r"la@.+", _body_text, re.I):
+            return self._room_list_commands(room, _body_text, sender, is_private)
         # أمر استعلام تواجد المستخدم is@اسم أو is اسم
         m_is = re.fullmatch(r"(?:is@|is\s+@?)([^\s@]+)", _body_text, re.I)
         if m_is:
@@ -17451,6 +17454,11 @@ class TalkinBot:
         public_top_command = str(body or "").strip().casefold() in {
             "توب", "top", "توب الألعاب", "توب الالعاب", "top games", "games top", "ملياري", "مليارات", "مليوني", "ملايين"
         }
+        public_shop_command = bool(
+            str(body or "").strip().casefold() in {"متجر", "shop", "store", "story", "ترحيب_صورة", "welcome_image"}
+            or re.fullmatch(r"sby\s+[1-6]", str(body or "").strip(), re.I)
+            or re.fullmatch(r"ترحيب@.+", str(body or "").strip(), re.S)
+        )
         is_game_cmd = str(body or "").strip().casefold() in ("تشغيل الالعاب", "تشغيل الألعاب", "ايقاف الالعاب", "إيقاف الالعاب", "ايقاف الألعاب", "إيقاف الألعاب")
         is_creator_cmd = bool(re.match(r"^[+-]?صانع(?:ي| الغرفة| الغرفه)?(?:@.+)?$", str(body or "").strip(), re.I))
         pending_protection_choice = bool(
@@ -17505,6 +17513,7 @@ class TalkinBot:
             return True
         if (not _is_master_name(sender)
                 and not public_top_command
+                and not public_shop_command
                 and not (verification_manager_command and _is_mvip_master(sender))
                 and not (is_publish and _is_verified_user(sender))
                 and not (points_transfer_command and _is_verified_user(sender))
