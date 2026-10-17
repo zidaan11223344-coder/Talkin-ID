@@ -200,6 +200,17 @@ def test_id_command_returns_cached_id_as_plain_number():
     assert replies == [("Hall", "3456782")]
 
 
+def test_id_command_is_routed_before_master_only_management_gate():
+    bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
+    calls = []
+    bot._room_list_commands = lambda room, text, sender, is_private: calls.append(
+        (room, text, sender, is_private)
+    ) or True
+
+    assert bot._handle_management_command("Hall", "ايدي", "RegularMember", is_private=False)
+    assert calls == [("Hall", "ايدي", "RegularMember", False)]
+
+
 def test_stored_user_id_looks_up_case_insensitively_across_rooms():
     with patch.object(bot_module, "_persistent_rosters", return_value={
         "version": 1,

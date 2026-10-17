@@ -17196,6 +17196,10 @@ class TalkinBot:
         # master-only management gate below.
         _body_text = str(body or "").strip()
         _body_low = _body_text.casefold()
+        # ID lookup is intentionally public: run it before the master-only
+        # management gate so any member can retrieve their own server ID.
+        if re.fullmatch(r"(?:ايدي|أيدي|id)(?:@(.+))?", _body_text, re.I):
+            return self._room_list_commands(room, _body_text, sender, is_private)
         # أمر استعلام تواجد المستخدم is@اسم أو is اسم
         m_is = re.fullmatch(r"(?:is@|is\s+@?)([^\s@]+)", _body_text, re.I)
         if m_is:
@@ -18438,8 +18442,6 @@ class TalkinBot:
                     "room_admin", type_="members_list", room=query_room,
                     to=BOT_ID, value="none", id_=request_id,
                 ))
-                response = f"⏳ أبحث عن ID في أعضاء {query_room}..."
-                (self.send_private_text(sender, response) if is_private else self.send_room_text(room, response))
             except Exception as exc:
                 self._pending_room_lists.pop(_norm_room(query_room), None)
                 self.log("[USER-ID] native lookup failed", repr(exc))
