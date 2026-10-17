@@ -18129,8 +18129,7 @@ class TalkinBot:
                           if _norm_user(user.get("username")) == wanted
                           and str(user.get("user_id") or "").strip().isdigit()), None)
             if match:
-                target_name = str(match.get("username") or pending.get("target") or "").strip().lstrip("@")
-                response = f"🆔 @{target_name} — ID: {str(match.get('user_id')).strip()}"
+                response = str(match.get("user_id")).strip()
             else:
                 response = f"📭 لم يعثر الخادم على ID رقمي لـ @{pending.get('target')} في {source_room}."
             if pending.get("private_response"):
@@ -18414,7 +18413,7 @@ class TalkinBot:
                 return True
             cached_id = _stored_user_id(target, room)
             if cached_id:
-                response = f"🆔 @{target} — ID: {cached_id}"
+                response = cached_id
                 (self.send_private_text(sender, response) if is_private else self.send_room_text(room, response))
                 return True
             connected = sorted(getattr(self, "connected_rooms", set()) or [], key=_norm_room)
@@ -18431,15 +18430,15 @@ class TalkinBot:
                 request_id = secrets.token_urlsafe(15)[:20]
                 self._pending_room_lists[_norm_room(query_room)] = {
                     "room": query_room, "code": "uid", "sender": str(sender or "").strip(),
-                    "target": target, "request_type": "occupants_list", "request_id": request_id,
+                    "target": target, "request_type": "members_list", "request_id": request_id,
                     "requested_at": time.time(), "private_response": bool(is_private),
                     "response_room": str(room or query_room),
                 }
                 self.send_query(encode_query(
-                    "room_admin", type_="occupants_list", room=query_room,
+                    "room_admin", type_="members_list", room=query_room,
                     to=BOT_ID, value="none", id_=request_id,
                 ))
-                response = f"⏳ أطلب ID الخاص بـ @{target} من الخادم في {query_room}..."
+                response = f"⏳ أبحث عن ID في أعضاء {query_room}..."
                 (self.send_private_text(sender, response) if is_private else self.send_room_text(room, response))
             except Exception as exc:
                 self._pending_room_lists.pop(_norm_room(query_room), None)

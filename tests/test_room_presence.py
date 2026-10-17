@@ -183,12 +183,21 @@ def test_id_command_queries_server_and_returns_numeric_user_id():
         pending = bot._pending_room_lists[bot_module._norm_room("Hall")]
         assert pending["code"] == "uid"
         assert pending["target"] == "Ahmed"
+        assert pending["request_type"] == "members_list"
         assert bot._complete_pending_room_list({"_occupants_room": "Hall"})
 
     assert len(queries) == 1
     assert replies[-1][0] == "Hall"
-    assert "@Ahmed" in replies[-1][1]
-    assert "3456782" in replies[-1][1]
+    assert replies[-1][1] == "3456782"
+
+
+def test_id_command_returns_cached_id_as_plain_number():
+    bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
+    replies = []
+    bot.send_room_text = lambda room, text: replies.append((room, text))
+    with patch.object(bot_module, "_stored_user_id", return_value="3456782"):
+        assert bot._room_list_commands("Hall", "ايدي", "Ahmed", is_private=False)
+    assert replies == [("Hall", "3456782")]
 
 
 def test_stored_user_id_looks_up_case_insensitively_across_rooms():
