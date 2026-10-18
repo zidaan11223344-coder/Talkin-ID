@@ -60,3 +60,15 @@ def test_failed_redemption_restores_inventory(tmp_path, monkeypatch):
 def test_format_cooldown_shows_seconds():
     assert game.format_cooldown(30) == "30 ثانية"
     assert game.format_cooldown(61) == "1 دقيقة و1 ثانية"
+
+
+def test_test_diamond_grant_cycles_types_and_persists_inventory(tmp_path, monkeypatch):
+    monkeypatch.setattr(game, "DATA_PATH", tmp_path / "treasures.json")
+    first_cycle = [game.give_test_diamond("master", "Master") for _ in game.DIAMOND_KEYS]
+    assert [result["item"] for result in first_cycle] == game.DIAMOND_KEYS
+
+    next_result = game.give_test_diamond("master", "Master")
+    assert next_result["item"] == game.DIAMOND_KEYS[0]
+    inventory = game.inventory("master", "Master")
+    assert inventory[game.DIAMOND_KEYS[0]] == 2
+    assert game.leaderboard()[0] == (len(game.DIAMOND_KEYS) + 1, "Master")

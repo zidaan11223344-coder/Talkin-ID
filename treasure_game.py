@@ -120,6 +120,21 @@ def mine(user_id, username="", now=None):
         return {"ok": True, "found": True, "item": chosen, "label": item["label"], "diamond": item["diamond"], "image": item["image"], "points": item["points"]}
 
 
+def give_test_diamond(user_id, username=""):
+    """Grant the next diamond type to the master for testing the room image flow."""
+    with LOCK:
+        data = _load()
+        index = int(data.get("test_diamond_index", 0) or 0) % len(DIAMOND_KEYS)
+        key = DIAMOND_KEYS[index]
+        row = _player(data, user_id, username)
+        row["inventory"][key] = int(row["inventory"].get(key, 0) or 0) + 1
+        row["diamonds_found"] = int(row.get("diamonds_found", 0) or 0) + 1
+        data["test_diamond_index"] = (index + 1) % len(DIAMOND_KEYS)
+        _save(data)
+        item = ITEMS[key]
+        return {"ok": True, "item": key, "label": item["label"], "diamond": True, "image": item["image"], "points": item["points"]}
+
+
 def inventory(user_id, username=""):
     with LOCK:
         data = _load(); row = _player(data, user_id, username); _save(data)
