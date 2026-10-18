@@ -17372,11 +17372,36 @@ class TalkinBot:
                 self.send_room_text(room, menu)
             return True
         if _body_low == "مستويات":
-            _key = (("__private__" if is_private else str(room)), _norm_user(sender))
-            self.help_pages[_key] = 3
-            self.help_page_part[_key] = 1
-            self.help_game_part[_key] = 1
-            self._send_help(room=room, private_to=sender if is_private else None, page=3, game_part=1)
+            language = self._effective_room_language(room) if room and not is_private else "ar"
+            english = str(language or "ar").casefold() == "en"
+            item_lines = []
+            for tier_index in range(len(GAME_LEVEL_TIERS) + 1):
+                for level_in_tier in range(1, GAME_LEVELS_PER_TIER + 1):
+                    plays = tier_index * GAMES_PER_TIER + (level_in_tier - 1) * GAMES_PER_LEVEL
+                    _level, title, _plays, category, symbol, _tier = _game_level_details_from_plays(plays)
+                    global_level = tier_index * GAME_LEVELS_PER_TIER + level_in_tier
+                    last_play = plays + GAMES_PER_LEVEL - 1
+                    if english:
+                        item_lines.append(f"{symbol} Level {global_level}: {title} — {category} — {plays:,}–{last_play:,} games")
+                    else:
+                        item_lines.append(f"{symbol} المستوى {global_level}: {title} — {category} — من {plays:,} إلى {last_play:,} لعبة")
+            item_lines.append(
+                "بعد المستوى 90 تستمر فئات الماس الملكي تلقائياً، وكل فئة جديدة تضم 10 مستويات."
+                if not english else
+                "After level 90, royal-diamond tiers continue automatically, with 10 levels per tier."
+            )
+            headings = (
+                ["📚 Game progression levels", "Each level requires 500 games; titles are shown in Arabic."]
+                if english else
+                ["📚 مستويات تقدم الألعاب", "كل مستوى يحتاج 500 لعبة. القائمة تعرض أول 90 مستوى والفئات التالية تستمر تلقائياً."]
+            )
+            packet_type = "chat_message" if is_private else "room_message"
+            route_fields = {"to": str(sender or "")} if is_private else {"room": str(room or "")}
+            pages = _safe_text_pages_from_items(
+                packet_type, route_fields, headings, item_lines,
+                max_items_per_page=10, language=language,
+            )
+            self._send_paginated_text_pages(sender, room, packet_type, pages, route_fields, language=language)
             return True
         _m_public_help = re.fullmatch(r"a([1-6])", _body_low)
         if _m_public_help:
