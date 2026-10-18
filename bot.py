@@ -50,6 +50,7 @@ except Exception:
 from dotenv import dotenv_values, load_dotenv
 from cricket_integration import CricketIntegration
 import shop as member_shop
+import treasure_game
 # Public defaults live in the tracked project settings file. Empty values are
 # ignored so required secrets must come from Railway Variables, while an
 # explicitly injected Railway value always wins over the repository defaults.
@@ -700,6 +701,7 @@ def _select_persistent_data_dir():
 
 DATA_DIR = _select_persistent_data_dir()
 member_shop.SHOP_PATH = DATA_DIR / "shop_data.json"
+treasure_game.DATA_PATH = DATA_DIR / "treasure_game.json"
 
 # Telegram diagnostics: only the bot token is required. The first incoming
 # Telegram message is used to learn and persist the chat_id automatically.
@@ -3069,7 +3071,7 @@ def _looks_like_bot_command(text):
         "sa@", "sav@", "bom@", "work", "salary", "عمل", "راتبي", ".sa ", "vi@", "vip@", "unvip@", "uns@", "ازالة توثيق@", "إزالة توثيق@", "سحب التوثيق@", "إضافة ماستر@", "اضافة ماستر@", "سحب ماستر@", "إزالة ماستر@",
         ".u", "b@", "bl@", "k@", "u@", "ub@", "m@", "member ", "a@", "o@", "ban ", "kick ", "unban ", "admin ", "owner ", "ادمن", "طرد", "حظر", "اونر", "أونر", "عضو", "ماستر", "ماستر توثيق",
         "mas@", "umas@", "mvip@", "umvip@", "l@mvip", "l@mas", "sb@", "i@", "inv", "دعوات", "دعوه ", "دعوة ", "invite", "رساله ", "mvip@", "umvip@", "l@mvip", "l@mas", "خروج",
-        "say ", "قل ", "دخول@", "join@", "play ", "music ", "song ", "post@", "publish@", "protection", "enable protection", "disable protection", "رساله ", "تحويل للكل@", "خاص@", "رسالة@", "رساله خاص@", "broadcast@", "رسالهغرف@", "رسالةغرف@", "رساله غرفه@", "رسالة غرفه@", "مشاركه ", "مشاركة ", ".تشغيل ", "بث ", "help", "a1", "a2", "a3", "a4", "a5", "a6", "ns", "التالي", "القائمة التالية", "next", "اوامر", "المسترات", "نقاطي", "points", "توب", "top", "ملياري", "مليارات", "مليوني", "ملايين", "هدايا", "gifts", "gv", "sher@", "sby", "متجر", "shop", "store", "story", "la@", "ترحيب@", "ايدي", "أيدي", "id@", "فتح المليون", "غلق المليون", "فتح مليار", "غلق مليار", "فتح المليار", "غلق المليار", "فحص صورة المليار", "فحص صوره المليار", "فحص_صورة_المليار",
+        "say ", "قل ", "دخول@", "join@", "play ", "music ", "song ", "post@", "publish@", "protection", "enable protection", "disable protection", "رساله ", "تحويل للكل@", "خاص@", "رسالة@", "رساله خاص@", "broadcast@", "رسالهغرف@", "رسالةغرف@", "رساله غرفه@", "رسالة غرفه@", "مشاركه ", "مشاركة ", ".تشغيل ", "بث ", "help", "a1", "a2", "a3", "a4", "a5", "a6", "ns", "التالي", "القائمة التالية", "next", "اوامر", "المسترات", "نقاطي", "points", "توب", "top", "الماس", "ألماس", "الالماس", "الألماس", "sv", "Rdem ", "R ", "توب الالماس", "توب الألماس", "ملياري", "مليارات", "مليوني", "ملايين", "هدايا", "gifts", "gv", "sher@", "sby", "متجر", "shop", "store", "story", "la@", "ترحيب@", "ايدي", "أيدي", "id@", "فتح المليون", "غلق المليون", "فتح مليار", "غلق مليار", "فتح المليار", "غلق المليار", "فحص صورة المليار", "فحص صوره المليار", "فحص_صورة_المليار",
         "العاب", "ألعاب", "لعب", "تسليه", "تسلية", "زواج", "زوجه", "تحدي", "لغز", "مزاج", "حظ", "حظ يا نصيب", "نرد", "بورصه", "بورصة", "بورصتي", "my stock history", "my stock market", "بنك", "تخمين", "سؤال", "حجر", "ورق", "مقص", "مليار", "بنك مليون", "ثعبان", "snake", "سناكي", "لودو", "ludo", "انضمام", "join", "rool", "roll", "مراهنة@", "مراهنه@", "رهان@", "مضاربة@", "استثمار@", "حظي@", "زرع", "حصانه", "حصانة", "عملة", "عجلة", "صندوق", "كوب", "كأس", "طاولة", "اونو", "وحش", "بركان", "طائر", "نجم", "حصانة", "فيس", "سنارة", "سناره", "برق", "ياقوت", "صدام", "كاشف", "اسرق", "بوست", "انشر", "تشغيل الحماية", "تشغيل الحمايه", "إيقاف الحماية", "ايقاف الحماية", "mr@", "mbp@",
         "+sr@", "sr@", "swc", "خاص@", "رسالة@", "broadcast@", "mf@", "+mf@", "-mf@", "l@mf", "l@sr", "l@mbp", "l@a", "l@m", "l@o", "l@b", "is@", "mbp@", "clear@mf", "دخول الكل", "دخولكل", "اضف لملف الغرف", "أضف لملف الغرف", "تشغيل الدعوات", "ايقاف الدعوات", "إيقاف الدعوات", "تشغيل الالعاب", "تشغيل الألعاب", "ايقاف الالعاب", "إيقاف الالعاب", "ايقاف الألعاب", "إيقاف الألعاب", "s@", "صورتي", "صورتك", ".صوره", ".صوره@", "شبيه@", "شبيه ", "شبيهك@", "شبيهك ",
         ".دخول غرفي", "دخول غرفي", "دخولغرفي", "my rooms", "start verification", "stop verification", "تشغيل التوثيق", "إيقاف التوثيق", "ايقاف التوثيق",
@@ -3357,19 +3359,79 @@ def _game_stats_data():
         return _GAME_STATS_CACHE
 
 
-# العتبات السابقة محفوظة حتى لا تتغير مستويات اللاعبين الحاليين.
-GAME_LEVELS = (
-    (0, "لاعب جديد"),
-    (21, "لاعب نشيط"),
-    (50, "لاعب محترف"),
-    (150, "أسطورة الألعاب"),
-    (500, "ملك الألعاب"),
-    (1000, "سيد الألعاب"),
-    (2000, "إمبراطور الألعاب"),
-    (5000, "بطل الألعاب"),
-    (10000, "نجم الألعاب"),
-    (20000, "أسطورة الأساطير"),
+# نظام مستويات الترحيب: كل فئة 5,000 لعبة، وكل مستوى 500 لعبة.
+# هذه إعدادات عرض فقط؛ مصدر عدد الألعاب يبقى GAME_STATS_FILE كما هو.
+GAME_LEVELS_PER_TIER = 10
+GAMES_PER_LEVEL = 500
+GAMES_PER_TIER = GAME_LEVELS_PER_TIER * GAMES_PER_LEVEL
+
+GAME_LEVEL_TIERS = (
+    {
+        "name": "النجوم الفضية", "symbol": "⭐",
+        "titles": ("مبتدئ", "لاعب ناشئ", "مقاتل", "برونزي", "فضي", "ذهبي", "محترف", "خبير", "أسطورة", "أسطورة فضية"),
+    },
+    {
+        "name": "النجوم الذهبية", "symbol": "🌟",
+        "titles": ("ذهبي مبتدئ", "محارب ذهبي", "ذهبي محترف", "ذهبي متألق", "ذهبي نادر", "أمير الذهب", "فارس الذهب", "قائد الذهب", "أسطورة الذهب", "ملك الذهب"),
+    },
+    {
+        "name": "الماس الأزرق", "symbol": "💎",
+        "titles": ("ماسي مبتدئ", "ماسي متألق", "ماسي محترف", "فارس الماس", "الماسي النادر", "أمير الماس", "قائد الماس", "أسطورة الماس", "إمبراطور الماس", "ملك الماس الأزرق"),
+    },
+    {
+        "name": "الماس البرونزي", "symbol": "🟤",
+        "titles": ("برونزي نادر", "فارس البرونز", "برونزي محترف", "البرونزي المتألق", "سيد البرونز", "أمير البرونز", "قائد البرونز", "أسطورة البرونز", "إمبراطور البرونز", "ملك الماس البرونزي"),
+    },
+    {
+        "name": "الماس الأحمر", "symbol": "❤️",
+        "titles": ("أحمر نادر", "محارب الماس الأحمر", "أحمر محترف", "فارس الماس الأحمر", "أمير الماس الأحمر", "قائد الماس الأحمر", "أسطورة الماس الأحمر", "سيد الماس الأحمر", "إمبراطور الماس الأحمر", "ملك الماس الأحمر"),
+    },
+    {
+        "name": "الماس الأسود", "symbol": "🖤",
+        "titles": ("أسود مبتدئ", "محارب الماس الأسود", "أسود محترف", "فارس الماس الأسود", "الماسي الأسود النادر", "أمير الماس الأسود", "قائد الماس الأسود", "أسطورة الماس الأسود", "إمبراطور الماس الأسود", "ملك الماس الأسود"),
+    },
+    {
+        "name": "الماس البنفسجي", "symbol": "💜",
+        "titles": ("بنفسجي مبتدئ", "محارب الماس البنفسجي", "بنفسجي محترف", "فارس الماس البنفسجي", "الماسي البنفسجي النادر", "أمير الماس البنفسجي", "قائد الماس البنفسجي", "أسطورة الماس البنفسجي", "إمبراطور الماس البنفسجي", "ملك الماس البنفسجي"),
+    },
+    {
+        "name": "الماس الملكي", "symbol": "👑",
+        "titles": ("ملكي مبتدئ", "محارب الماس الملكي", "ملكي محترف", "فارس الماس الملكي", "الماسي الملكي النادر", "أمير الماس الملكي", "قائد الماس الملكي", "أسطورة الماس الملكي", "إمبراطور الماس الملكي", "ملك الماس الملكي"),
+    },
 )
+
+
+def _game_level_details_from_plays(plays):
+    """Return tier-local level, title, category, symbol and display tier number."""
+    try:
+        plays = max(0, int(plays or 0))
+    except (TypeError, ValueError):
+        plays = 0
+    tier_index = plays // GAMES_PER_TIER
+    level = (plays % GAMES_PER_TIER) // GAMES_PER_LEVEL + 1
+
+    if tier_index < len(GAME_LEVEL_TIERS):
+        tier = GAME_LEVEL_TIERS[tier_index]
+        title = tier["titles"][level - 1]
+        category = tier["name"]
+        symbol = tier["symbol"]
+    else:
+        # يستمر النظام بلا سقف؛ بعد الفئات المعرفة تُنشأ فئات ملكية مرقمة تلقائياً.
+        extra_index = tier_index - len(GAME_LEVEL_TIERS) + 1
+        category = f"الماس الملكي {extra_index}"
+        symbol = "👑"
+        title = ("مغامر " + category if level == 1 else
+                 "محارب " + category if level == 2 else
+                 "محترف " + category if level == 3 else
+                 "فارس " + category if level == 4 else
+                 "نادر " + category if level == 5 else
+                 "أمير " + category if level == 6 else
+                 "قائد " + category if level == 7 else
+                 "أسطورة " + category if level == 8 else
+                 "إمبراطور " + category if level == 9 else
+                 "ملك " + category)
+    return level, title, plays, category, symbol, tier_index + 1
+
 
 def _game_name_key(name):
     """Compare decorated usernames without changing their displayed form."""
@@ -3574,19 +3636,15 @@ def _game_level_from_item(item):
     games = item.get("games", {}) if isinstance(item, dict) else {}
     plays = sum(int((value or {}).get("plays", 0) or 0)
                 for value in games.values()) if isinstance(games, dict) else 0
-    level_number, label = 1, GAME_LEVELS[0][1]
-    for number, (threshold, current_label) in enumerate(GAME_LEVELS, 1):
-        if plays >= threshold:
-            level_number, label = number, current_label
-    return level_number, label, plays
+    level, label, plays, _category, _symbol, _tier = _game_level_details_from_plays(plays)
+    return level, label, plays
 
 
 def _game_level_info(username):
     data = _game_stats_data()
     _key, item = _game_item_for_username(data, username)
     if not item:
-        # Older deployments wrote the compact level snapshot before the main
-        # game-stats file was restored. Use it as a read-only recovery source.
+        # Read-only recovery source for older deployments; no schema changes.
         snapshot = _load_local_json(GAME_LEVELS_FILE, {})
         players = snapshot.get("players", {}) if isinstance(snapshot, dict) else {}
         if isinstance(players, dict):
@@ -3594,17 +3652,20 @@ def _game_level_info(username):
             item = next((candidate for key, candidate in players.items()
                          if isinstance(candidate, dict)
                          and _game_name_key(candidate.get("username") or key) == wanted), {})
-    games = item.get("games", {}) if isinstance(item, dict) else {}
+    games = item.get("games") if isinstance(item, dict) else None
     if isinstance(games, dict):
         plays = sum(int((value or {}).get("plays", 0) or 0) for value in games.values())
     else:
+        # Compatibility with the existing read-only compact snapshot format.
         plays = int(item.get("plays", 0) or 0) if isinstance(item, dict) else 0
-    level_number, label = 1, GAME_LEVELS[0][1]
-    for number, (threshold, current_label) in enumerate(GAME_LEVELS, 1):
-        if plays >= threshold:
-            level_number, label = number, current_label
-    return level_number, label, plays
+    level, label, plays, _category, _symbol, _tier = _game_level_details_from_plays(plays)
+    return level, label, plays
 
+
+def _game_level_details(username):
+    """Full presentation data for welcome messages, based on the existing game count."""
+    _level, _label, plays = _game_level_info(username)
+    return _game_level_details_from_plays(plays)
 
 def _game_star_rank(username):
     rows = []
@@ -3613,7 +3674,7 @@ def _game_star_rank(username):
         name = str(item.get("username") or canonical).strip().lstrip("@")
         if plays:
             rows.append((level, plays, canonical, name))
-    rows.sort(key=lambda row: (-row[0], -row[1], row[2]))
+    rows.sort(key=lambda row: (-row[1], -row[0], row[2]))
     for rank, row in enumerate(rows[:15], 1):
         if row[2] == _game_name_key(username):
             return rank
@@ -3634,7 +3695,7 @@ def _game_top10():
             username,
         )
     rows = list(rows_by_name.values())
-    rows.sort(key=lambda row: (-row[0], -row[2], _norm_user(row[3])))
+    rows.sort(key=lambda row: (-row[2], -row[0], _norm_user(row[3])))
     return rows[:15]
 
 
@@ -3658,7 +3719,7 @@ def _save_game_levels_snapshot():
         if plays:
             username = str(item.get("username") or canonical).strip().lstrip("@")
             ranked.append((level, plays, canonical, username))
-    ranked.sort(key=lambda row: (-row[0], -row[1], row[2]))
+    ranked.sort(key=lambda row: (-row[1], -row[0], row[2]))
     ranks = {canonical: index for index, (_level, _plays, canonical, _name)
              in enumerate(ranked[:15], 1)}
     for canonical, item in aggregates.items():
@@ -3698,22 +3759,25 @@ def _schedule_game_levels_snapshot():
 
 
 def _game_welcome(username, room):
-    level, label, plays = _game_level_info(username)
-    if plays < 50:
-        return (f"🎮 دخل @{username}\n"
-                f"🏠 الغرفة: {room}\n"
-                f"🎯 جولاتك: {plays}")
-    star_line = f"\n⭐ ترتيب النجوم\n       {'⭐' * level}"
-    return (f"🎮 دخل @{username}\n"
-            f"{label}\n"
-            f"🏠 الغرفة: {room}\n"
-            f"🏅 مستوى الألعاب: {level}\n"
-                f"🎯 جولاتك: {plays}{star_line}")
-
+    level, label, plays, category, symbol, _tier = _game_level_details(username)
+    symbol_line = f"{symbol * level}"
+    return (f"🎉 يا هلا بعودة اللاعب!\n"
+            f"👤 اللاعب: {str(username).strip().lstrip('@')}\n"
+            f"🏆 اللقب: {label}\n"
+            f"💠 الفئة: {category}\n"
+            f"📊 المستوى: {level}\n"
+            f"🎮 عدد الألعاب: {plays}\n"
+            f"{symbol_line}")
 
 def _join_welcome_message(username, room, custom_welcome_enabled=True, custom_welcome=None):
-    """Build the automatic join welcome without mixing VIP and game levels."""
+    """Build the automatic join welcome using the same level format for the configured master."""
     _level, _label, plays = _game_level_info(username)
+    # The configured master uses the same level/category/title welcome as other
+    # players, including when their recorded game count is below the usual
+    # 50-game welcome threshold. Do not replace it with a separate master-only
+    # greeting or a VIP-only template.
+    if _is_configured_master_account(username):
+        return _game_welcome(username, room)
     is_vip = _is_vip_user(username)
     if plays < 50:
         if not is_vip:
@@ -18647,6 +18711,85 @@ class TalkinBot:
         """Giant-style persistent management commands. Returns True if consumed."""
         text=str(body or "").strip()
         low=text.casefold()
+
+        # Persistent mining game: public room/DM commands, sharing the bot's existing points account.
+        if low in {"الماس", "ألماس", "الالماس", "الألماس", "mine", "mining"}:
+            result = treasure_game.mine(sender, sender)
+            if not result.get("ok"):
+                reply = "⏳ لقد استخدمت فرصة التنقيب. عُد بعد " + treasure_game.format_cooldown(result.get("remaining", 0)) + "."
+                if is_private: self.send_private_text(sender, reply)
+                else: self.send_room_text(room, reply)
+                return True
+            searching = "💎 جاري البحث عن الألماس والكنوز في أعماق المنجم..."
+            if is_private: self.send_private_text(sender, searching)
+            else: self.send_room_text(room, searching)
+            time.sleep(1.0)
+            if not result.get("found"):
+                reply = "🔎 لم يتم العثور على كنز هذه المرة. يمكنك المحاولة مجدداً بعد ساعتين."
+            else:
+                reply = f"💎 نتيجة التنقيب\n━━━━━━━━━━━━\n⛏️ عثرت على: {result['label']}\n🎒 أُضيف إلى مخزونك.\n🛒 قيمة الاستبدال: {result['points']:,} نقطة للقطعة."
+            if is_private: self.send_private_text(sender, reply)
+            else: self.send_room_text(room, reply)
+            if result.get("found"):
+                base = (os.getenv("PUBLIC_BASE_URL") or os.getenv("GIFT_PUBLIC_BASE_URL") or "").strip().rstrip("/")
+                image_url = f"{base}/assets/{result['image']}" if base else ""
+                if image_url:
+                    try: self.send_private_media(sender, image_url, "image") if is_private else self.send_room_media(room, image_url, "image")
+                    except Exception as exc: self.log("[TREASURE] image send failed", repr(exc))
+            return True
+
+        if low == "sv":
+            inv = treasure_game.inventory(sender, sender)
+            lines = ["🎒 مخزون الكنوز", "━━━━━━━━━━━━"]
+            total = 0
+            for key, item in treasure_game.ITEMS.items():
+                qty = int(inv.get(key, 0) or 0)
+                if qty:
+                    lines.append(f"💎 {item['label']}: {qty} | قيمة الاستبدال: {qty * int(item['points']):,} نقطة")
+                    total += qty * int(item["points"])
+            if not any(int(inv.get(k, 0) or 0) for k in treasure_game.ITEMS):
+                lines.append("لا توجد كنوز في مخزونك حالياً.")
+            else:
+                lines.append(f"━━━━━━━━━━━━\n💰 إجمالي قيمة المخزون: {total:,} نقطة")
+                lines.append("للاستبدال: R الماس أو R نحاس أو Rdem الماس")
+            reply = "\n".join(lines)
+            if is_private: self.send_private_text(sender, reply)
+            else: self.send_room_text(room, reply)
+            return True
+
+        redeem = re.fullmatch(r"(?:Rdem|R)\s+(.+)", text, re.I)
+        if redeem:
+            result = treasure_game.begin_redemption(sender, sender, redeem.group(1))
+            if not result.get("ok"):
+                reply = "❌ هذا العنصر غير معروف في المتجر. العناصر المتاحة: نحاس، حديد، ياقوت، الماس، الماس الأزرق، الماس البنفسجي، الماس الأحمر، الماس الأسود، الماس الملكي." if result.get("error") == "unknown" else "❌ لا تملك هذا العنصر في مخزونك. اكتب sv لعرض المخزون."
+            else:
+                try:
+                    _add_points(sender, int(result["points"]))
+                    treasure_game.finish_redemption(result["txid"], True)
+                    try:
+                        _github_sync_after_local_save(treasure_game.DATA_PATH, None)
+                    except Exception as sync_exc:
+                        self.log("[TREASURE] optional sync failed", repr(sync_exc))
+                    reply = f"✅ تم استبدال {result['quantity']} من {result['label']} بنجاح.\n💰 أُضيف إلى رصيدك: {result['points']:,} نقطة."
+                except Exception as exc:
+                    treasure_game.finish_redemption(result["txid"], False)
+                    self.log("[TREASURE] redemption failed", repr(exc))
+                    reply = "❌ تعذر حفظ الاستبدال بأمان؛ أُعيدت الكنوز إلى مخزونك ولم تُعتمد العملية."
+            if is_private: self.send_private_text(sender, reply)
+            else: self.send_room_text(room, reply)
+            return True
+
+        if low in {"توب الالماس", "توب الألماس", "توب الماس", "توب الماس", "top diamonds", "diamond top"}:
+            rows = treasure_game.leaderboard(15)
+            medals = {1: "🥇", 2: "🥈", 3: "🥉"}
+            lines = ["💎 توب الألماس — إجمالي الألماس المكتشف", "━━━━━━━━━━━━"]
+            lines.extend(f"{medals.get(i, str(i) + '️⃣')} {name} — {count} ألماسة" for i, (count, name) in enumerate(rows, 1))
+            if not rows: lines.append("لا توجد نتائج بعد. اكتب الماس لبدء التنقيب.")
+            reply = "\n".join(lines)
+            if is_private: self.send_private_text(sender, reply)
+            else: self.send_room_text(room, reply)
+            return True
+
         if self._room_list_commands(room, text, sender, is_private):
             return True
 
@@ -21489,11 +21632,11 @@ class TalkinBot:
                 self._master_online_rooms.add(_norm_room(room))
                 self.master_online = True
                 self.master_last_seen = time.time()
-            # Welcome the master using the exact configured BOT_MASTER account.
+            # All human users, including the configured master, go through the
+            # shared welcome builder so the master receives the same level,
+            # title, category and decorative symbols instead of a separate greeting.
             welcome = None
-            if _norm_user(username) == _norm_user(BOT_MASTER):
-                welcome = f"👑 لقد أتاكم الزعيم\n👤 {username}\n🏠 الغرفة: {room}"
-            elif username and _norm_user(username) != _norm_user(BOT_ID):
+            if username and _norm_user(username) != _norm_user(BOT_ID):
                 welcomes_enabled = bool(getattr(self, "custom_welcome_enabled", True))
                 cw = getattr(self, "custom_welcomes", {}).get(_norm_user(username)) if welcomes_enabled else None
                 welcome = _join_welcome_message(username, room, welcomes_enabled, cw)

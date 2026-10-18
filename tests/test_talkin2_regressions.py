@@ -1264,7 +1264,7 @@ class BotGameAndMusicRegressions(unittest.TestCase):
             level, _label, plays = bot_module._game_level_info(decorated)
             stats = bot_module._game_stats(decorated, "star")
         self.assertEqual(plays, 3890)
-        self.assertEqual(level, 7)
+        self.assertEqual(level, 8)
         self.assertEqual(stats["plays"], 3890)
 
     def test_record_game_merges_into_legacy_compact_stats(self):
@@ -1364,20 +1364,23 @@ class BotGameAndMusicRegressions(unittest.TestCase):
         }):
             level, label, plays = bot_module._game_level_info(decorated)
             welcome = bot_module._game_welcome(decorated, "North")
-            self.assertEqual(level, 3)
+            self.assertEqual(level, 1)
             self.assertEqual(plays, 50)
+            self.assertEqual(label, "مبتدئ")
             self.assertIn(label, welcome)
             self.assertIn(decorated, welcome)
-            self.assertIn("🏅 مستوى الألعاب: 3", welcome)
+            self.assertIn("📊 المستوى: 1", welcome)
+            self.assertIn("💠 الفئة: النجوم الفضية", welcome)
 
     def test_new_player_gets_level_and_star_welcome(self):
         decorated = "♥☼هـــــ☼ـــادي☼♥اا"
         with patch.object(bot_module, "_game_stats_data", return_value={}):
             welcome = bot_module._game_welcome(decorated, "North")
             self.assertIn(decorated, welcome)
-            self.assertNotIn("🏅 مستوى الألعاب", welcome)
-            self.assertNotIn("⭐ ترتيب النجوم", welcome)
-            self.assertIn("🎯 جولاتك: 0", welcome)
+            self.assertIn("📊 المستوى: 1", welcome)
+            self.assertIn("🏆 اللقب: مبتدئ", welcome)
+            self.assertIn("🎮 عدد الألعاب: 0", welcome)
+            self.assertEqual(welcome.count("⭐"), 1)
 
     def test_game_level_welcome_starts_at_exactly_50_games(self):
         with patch.object(bot_module, "_game_stats_data", return_value={
@@ -1388,8 +1391,10 @@ class BotGameAndMusicRegressions(unittest.TestCase):
             "player": {"username": "player", "games": {"star": {"plays": 50}}}
         }):
             after = bot_module._game_welcome("player", "North")
-        self.assertNotIn("🏅 مستوى الألعاب", before)
-        self.assertIn("🏅 مستوى الألعاب", after)
+        self.assertIn("📊 المستوى: 1", before)
+        self.assertIn("📊 المستوى: 1", after)
+        self.assertIn("🎮 عدد الألعاب: 49", before)
+        self.assertIn("🎮 عدد الألعاب: 50", after)
 
     def test_join_welcome_uses_vip_only_before_50_games(self):
         with patch.object(bot_module, "_is_vip_user", side_effect=lambda name: name == "vip"):
@@ -1404,7 +1409,34 @@ class BotGameAndMusicRegressions(unittest.TestCase):
             bot_module, "_game_stats_data", return_value=records
         ):
             welcome = bot_module._join_welcome_message("regular", "North")
-        self.assertIn("🏅 مستوى الألعاب", welcome)
+        self.assertIn("📊 المستوى: 1", welcome)
+        self.assertIn("🎮 عدد الألعاب: 50", welcome)
+
+    def test_game_level_tier_boundaries_and_titles(self):
+        expected = {
+            0: (1, "مبتدئ", "النجوم الفضية", "⭐"),
+            500: (2, "لاعب ناشئ", "النجوم الفضية", "⭐"),
+            1000: (3, "مقاتل", "النجوم الفضية", "⭐"),
+            2500: (6, "ذهبي", "النجوم الفضية", "⭐"),
+            4500: (10, "أسطورة فضية", "النجوم الفضية", "⭐"),
+            4999: (10, "أسطورة فضية", "النجوم الفضية", "⭐"),
+            5000: (1, "ذهبي مبتدئ", "النجوم الذهبية", "🌟"),
+            7000: (5, "ذهبي نادر", "النجوم الذهبية", "🌟"),
+            9500: (10, "ملك الذهب", "النجوم الذهبية", "🌟"),
+            10000: (1, "ماسي مبتدئ", "الماس الأزرق", "💎"),
+            12500: (6, "أمير الماس", "الماس الأزرق", "💎"),
+            15000: (1, "برونزي نادر", "الماس البرونزي", "🟤"),
+            20000: (1, "أحمر نادر", "الماس الأحمر", "❤️"),
+            25000: (1, "أسود مبتدئ", "الماس الأسود", "🖤"),
+            30000: (1, "بنفسجي مبتدئ", "الماس البنفسجي", "💜"),
+            35000: (1, "ملكي مبتدئ", "الماس الملكي", "👑"),
+            40000: (1, "مغامر الماس الملكي 1", "الماس الملكي 1", "👑"),
+            1000000: (1, "مغامر الماس الملكي 193", "الماس الملكي 193", "👑"),
+        }
+        for plays, wanted in expected.items():
+            with self.subTest(plays=plays):
+                level, title, _count, category, symbol, _tier = bot_module._game_level_details_from_plays(plays)
+                self.assertEqual((level, title, category, symbol), wanted)
 
     def test_sb_uses_sender_balance_and_msb_is_master_private_only(self):
         bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
