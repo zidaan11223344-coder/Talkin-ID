@@ -18761,12 +18761,14 @@ class TalkinBot:
             if not result.get("found"):
                 reply = "🔎 لم يتم العثور على كنز هذه المرة. يمكنك المحاولة مجدداً بعد 30 ثانية."
             else:
-                reply = f"💎 نتيجة التنقيب\n━━━━━━━━━━━━\n⛏️ عثرت على: {result['label']}\n🎒 أُضيف إلى مخزونك.\n🛒 قيمة الاستبدال: {result['points']:,} نقطة للقطعة."
+                display_name = str(sender or "").strip().lstrip("@")
+                symbol = result.get("symbol", "💎")
+                reply = f"{display_name}\n━━━━━━━━━━━━\n⛏️ عثرت على: {symbol} {result['label']}\n🎒 أُضيف إلى مخزونك.\n🛒 قيمة الاستبدال: {result['points']:,} نقطة للقطعة."
             if is_private: self.send_private_text(sender, reply)
             else: self.send_room_text(room, reply)
             if result.get("found"):
-                base = (os.getenv("PUBLIC_BASE_URL") or os.getenv("GIFT_PUBLIC_BASE_URL") or "").strip().rstrip("/")
-                image_url = f"{base}/assets/{result['image']}" if base else ""
+                base = _public_base_url()
+                image_url = f"{base}/assets/{result['image']}?found={uuid.uuid4().hex}" if base else ""
                 if image_url:
                     try: self.send_private_media(sender, image_url, "image") if is_private else self.send_room_media(room, image_url, "image")
                     except Exception as exc: self.log("[TREASURE] image send failed", repr(exc))

@@ -11,15 +11,15 @@ DAILY_DIAMOND_SPAWNS = 15
 
 # weights are relative probabilities; they are normalized automatically.
 ITEMS = {
-    "نحاس": {"label": "النحاس", "points": 5, "weight": 27.0, "diamond": False, "image": "treasure_copper.png"},
-    "حديد": {"label": "الحديد", "points": 15, "weight": 18.0, "diamond": False, "image": "treasure_iron.png"},
-    "ياقوت": {"label": "الياقوت الأحمر", "points": 50, "weight": 8.0, "diamond": False, "image": "treasure_ruby.png"},
-    "الماس": {"label": "الألماس العادي", "points": 100, "weight": 4.0, "diamond": True, "image": "diamond_normal.png"},
-    "الماس_ازرق": {"label": "الألماس الأزرق النادر", "points": 250, "weight": 1.5, "diamond": True, "image": "diamond_blue.png"},
-    "الماس_بنفسجي": {"label": "الألماس البنفسجي النادر جداً", "points": 500, "weight": 0.8, "diamond": True, "image": "diamond_purple.png"},
-    "الماس_احمر": {"label": "الألماس الأحمر الأسطوري", "points": 1000, "weight": 0.4, "diamond": True, "image": "diamond_red.png"},
-    "الماس_اسود": {"label": "الألماس الأسود شديد الندرة", "points": 2500, "weight": 0.2, "diamond": True, "image": "diamond_black.png"},
-    "الماس_ملكي": {"label": "الألماس الملكي", "points": 5000, "weight": 0.1, "diamond": True, "image": "diamond_royal.png"},
+    "نحاس": {"label": "النحاس", "symbol": "🪙", "points": 5, "weight": 27.0, "diamond": False, "image": "treasure_copper.png"},
+    "حديد": {"label": "الحديد", "symbol": "⚙️", "points": 15, "weight": 18.0, "diamond": False, "image": "treasure_iron.png"},
+    "ياقوت": {"label": "الياقوت الأحمر", "symbol": "❤️", "points": 50, "weight": 8.0, "diamond": False, "image": "treasure_ruby.png"},
+    "الماس": {"label": "الألماس العادي", "symbol": "💎", "points": 100, "weight": 4.0, "diamond": True, "image": "diamond_normal.png"},
+    "الماس_ازرق": {"label": "الألماس الأزرق النادر", "symbol": "💙", "points": 250, "weight": 1.5, "diamond": True, "image": "diamond_blue.png"},
+    "الماس_بنفسجي": {"label": "الألماس البنفسجي النادر جداً", "symbol": "💜", "points": 500, "weight": 0.8, "diamond": True, "image": "diamond_purple.png"},
+    "الماس_احمر": {"label": "الألماس الأحمر الأسطوري", "symbol": "❤️", "points": 1000, "weight": 0.4, "diamond": True, "image": "diamond_red.png"},
+    "الماس_اسود": {"label": "الألماس الأسود شديد الندرة", "symbol": "🖤", "points": 2500, "weight": 0.2, "diamond": True, "image": "diamond_black.png"},
+    "الماس_ملكي": {"label": "الألماس الملكي", "symbol": "👑", "points": 5000, "weight": 0.1, "diamond": True, "image": "diamond_royal.png"},
 }
 FAIL_WEIGHT = 40.0
 ALIASES = {
@@ -117,7 +117,7 @@ def mine(user_id, username="", now=None):
         if item["diamond"]:
             row["diamonds_found"] = int(row.get("diamonds_found", 0) or 0) + 1
         _save(data)
-        return {"ok": True, "found": True, "item": chosen, "label": item["label"], "diamond": item["diamond"], "image": item["image"], "points": item["points"]}
+        return {"ok": True, "found": True, "item": chosen, "label": item["label"], "symbol": item["symbol"], "diamond": item["diamond"], "image": item["image"], "points": item["points"]}
 
 
 def give_test_diamond(user_id, username=""):
@@ -132,7 +132,7 @@ def give_test_diamond(user_id, username=""):
         data["test_diamond_index"] = (index + 1) % len(DIAMOND_KEYS)
         _save(data)
         item = ITEMS[key]
-        return {"ok": True, "item": key, "label": item["label"], "diamond": True, "image": item["image"], "points": item["points"]}
+        return {"ok": True, "item": key, "label": item["label"], "symbol": item["symbol"], "diamond": True, "image": item["image"], "points": item["points"]}
 
 
 def inventory(user_id, username=""):

@@ -2650,6 +2650,29 @@ class BotGameAndMusicRegressions(unittest.TestCase):
         grant.assert_not_called()
         self.assertTrue(sent and "مخصص للماستر" in sent[0][1])
 
+    def test_mining_reply_shows_player_without_at_symbol_and_matching_item_image(self):
+        bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
+        sent = []
+        bot.send_room_text = lambda room, text: sent.append(("text", room, text))
+        bot.send_room_media = lambda room, url, kind, duration=0: sent.append(("media", room, url, kind)) or True
+        result = {
+            "ok": True, "found": True, "item": "ياقوت", "label": "الياقوت الأحمر",
+            "symbol": "❤️", "image": "treasure_ruby.png", "diamond": False, "points": 50,
+        }
+        with patch.object(bot_module.treasure_game, "mine", return_value=result), patch.object(
+            bot_module, "_public_base_url", return_value="https://example.test"
+        ), patch.object(bot_module.time, "sleep", return_value=None):
+            self.assertTrue(bot._handle_management_command_impl("North", "الماس", "@RubyUser", is_private=False))
+
+        reply = [entry[2] for entry in sent if entry[0] == "text"][-1]
+        self.assertTrue(reply.startswith("RubyUser\n"))
+        self.assertNotIn("@RubyUser", reply)
+        self.assertIn("عثرت على: ❤️ الياقوت الأحمر", reply)
+        media = [entry for entry in sent if entry[0] == "media"]
+        self.assertEqual(len(media), 1)
+        self.assertIn("treasure_ruby.png", media[0][2])
+        self.assertEqual(media[0][1], "North")
+
     def test_normal_song_request_broadcasts_to_all_active_rooms(self):
         bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
         bot.music_last = {}
