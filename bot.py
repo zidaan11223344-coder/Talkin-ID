@@ -7476,6 +7476,16 @@ class TalkinBot:
         master = str(BOT_MASTER or "").strip()
         if not master or _norm_user(master) == _norm_user(BOT_ID):
             return False
+        room_key = _norm_room(room)
+        notice_times = getattr(self, "_room_departure_notice_times", None)
+        if not isinstance(notice_times, dict):
+            notice_times = self._room_departure_notice_times = {}
+        now = time.monotonic()
+        last_notice = notice_times.get(room_key)
+        if last_notice is not None and now - float(last_notice) < 300.0:
+            self.log(f"[ROOM_DEPARTURE_NOTICE] repeated notice suppressed for {room}")
+            return False
+        notice_times[room_key] = now
         event = event if isinstance(event, dict) else {}
         reason = ""
         for field in ("reason", "detail", "message", "description", "cause", "status_reason"):
@@ -7490,7 +7500,7 @@ class TalkinBot:
             else:
                 reason = f"الخادم أرسل حدث {event_type} دون سبب تفصيلي."
         message = (
-            "⚠️ رصد البوت انقطاعه عن الغرفة؛ سيواصل محاولة العودة تلقائيًا حتى يؤكد الخادم دخوله."
+            "⚠️ رصد البوت خروجه من الغرفة؛ سيحاول العودة تلقائيًا، وإذا تكرر الخروج سريعًا فسيوقف المحاولات لتجنب الدوران."
             f"\n📍 الغرفة: {str(room or 'غير معروفة')[:120]}"
             f"\n🧾 السبب المسجل: {reason}"
         )
@@ -7914,13 +7924,18 @@ class TalkinBot:
             self.log("[AUTO_REJOIN] no server acknowledgement; not resending join:", room)
 
     def _schedule_auto_rejoin(self, room: str, delay: float = 1.2):
-        """Keep retrying a lost room indefinitely, with a capped backoff."""
+        """Rejoin a dropped room, but pause after repeated rapid server removals."""
         if not room:
             return
         room_key = _norm_room(room)
         if room_key in getattr(self, "blocked_rooms", set()):
             return
         if room_key in getattr(self, "_intentional_leaves", set()):
+            return
+        if not hasattr(self, "_auto_rejoin_paused"):
+            self._auto_rejoin_paused = set()
+        if room_key in self._auto_rejoin_paused:
+            self.log(f"[AUTO_REJOIN] paused after repeated rapid exits; manual join required: {room}")
             return
         if not hasattr(self, "_auto_rejoin_waiting_ack"):
             self._auto_rejoin_waiting_ack = set()
@@ -7937,23 +7952,52 @@ class TalkinBot:
         if not hasattr(self, "_auto_rejoin_state"):
             self._auto_rejoin_state = {}
         now = time.monotonic()
+        pause_reason = False
         with self._auto_rejoin_lock:
             if room_key in self._auto_rejoin_pending or room_key in self._auto_rejoin_waiting_ack:
                 self.log(f"[AUTO_REJOIN] already sent one join request; waiting for server: {room}")
                 return
-            state = self._auto_rejoin_state.setdefault(room_key, {"attempts": [], "joined_at": 0.0})
-            if state.get("joined_at") and now - float(state["joined_at"]) >= 120.0:
-                state["attempts"] = []
-            recent_attempts = [t for t in state.get("attempts", []) if now - float(t) < 900.0]
-            state["attempts"] = recent_attempts + [now]
-            # Never permanently give up after repeated transient disconnects.
-            # A confirmed join resets the retry history below; cap the backoff
-            # at 15 seconds so room-specific server drops do not leave the bot
-            # absent for minutes while still avoiding a rapid join flood.
-            delay = max(float(delay), min(15.0, 1.2 * (2 ** min(len(recent_attempts), 4))))
-            generation = int(getattr(self, "_connection_generation", 0))
-            self._auto_rejoin_pending.add(room_key)
-            self._auto_rejoin_waiting_ack.add(room_key)
+            state = self._auto_rejoin_state.setdefault(
+                room_key, {"attempts": [], "joined_at": 0.0, "rapid_losses": 0}
+            )
+            joined_at = float(state.get("joined_at", 0.0) or 0.0)
+            if joined_at:
+                joined_duration = max(0.0, now - joined_at)
+                if joined_duration < 120.0:
+                    state["rapid_losses"] = int(state.get("rapid_losses", 0) or 0) + 1
+                else:
+                    state["rapid_losses"] = 0
+                    state["attempts"] = []
+                state["joined_at"] = 0.0
+            if int(state.get("rapid_losses", 0) or 0) >= 3:
+                self._auto_rejoin_paused.add(room_key)
+                state["paused_at"] = now
+                pause_reason = True
+            if pause_reason:
+                self._auto_rejoin_waiting_ack.discard(room_key)
+                self._auto_rejoin_pending.discard(room_key)
+            else:
+                recent_attempts = [t for t in state.get("attempts", []) if now - float(t) < 900.0]
+                state["attempts"] = recent_attempts + [now]
+                # Exponentially back off unstable rooms, with a 15-second cap.
+                delay = max(float(delay), min(15.0, 1.2 * (2 ** min(len(recent_attempts), 4))))
+                generation = int(getattr(self, "_connection_generation", 0))
+                self._auto_rejoin_pending.add(room_key)
+                self._auto_rejoin_waiting_ack.add(room_key)
+        if pause_reason:
+            message = (
+                "⛔ أوقفت إعادة الدخول التلقائية لتجنب حلقة دخول وخروج متكررة."
+                f"\n📍 الغرفة: {str(room)[:120]}"
+                "\nتحقق من عضوية البوت وصلاحياته، ثم أرسل دخول@اسم_الغرفة واختر اللغة لإعادة المحاولة يدوياً."
+            )
+            self.log(f"[AUTO_REJOIN] circuit breaker paused {room} after 3 rapid confirmed exits")
+            master = str(BOT_MASTER or "").strip()
+            if master and _norm_user(master) != _norm_user(BOT_ID):
+                try:
+                    self.send_private_text(master, message)
+                except Exception as exc:
+                    self.log("[AUTO_REJOIN] pause notice failed:", repr(exc))
+            return
         def _rejoin_worker():
             try:
                 time.sleep(delay)
@@ -8024,6 +8068,10 @@ class TalkinBot:
         if requested_by:
             getattr(self, "_auto_rejoin_waiting_ack", set()).discard(room_norm)
             getattr(self, "_intentional_leaves", set()).discard(room_norm)
+            getattr(self, "_auto_rejoin_paused", set()).discard(room_norm)
+            rejoin_state = getattr(self, "_auto_rejoin_state", {}).get(room_norm)
+            if isinstance(rejoin_state, dict):
+                rejoin_state.update({"rapid_losses": 0, "joined_at": 0.0, "attempts": []})
             self.blocked_rooms.discard(room_norm)
             getattr(self, "_blocked_room_reasons", {}).pop(room_norm, None)
             getattr(self, "_blocked_room_notices", set()).discard(room_norm)
