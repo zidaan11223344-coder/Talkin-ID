@@ -1,6 +1,6 @@
 # تشغيل نسخة Talkin-ID للاختبار
 
-هذه نسخة اختبار مستقلة من Talkin2، وليست نسخة إنتاج. سجلاتها ومزامنتها موجّهة إلى المستودع الخاص `zidaan11223344-coder/Talkin-ID-Data`. لا تفعّل المزامنة قبل ضبط الرمز الخاص بالمستودع، ولا تستخدم إعدادات أو بيانات اعتماد Talkin2 الإنتاجية.
+هذه نسخة اختبار مستقلة من Talkin2، وليست نسخة إنتاج. سجلاتها ومزامنتها موجّهة إلى المستودع الخاص `zidaan11223344-coder/Talkin4`. لا تفعّل المزامنة قبل ضبط الرمز الخاص بالمستودع، ولا تستخدم إعدادات أو بيانات اعتماد Talkin2 الإنتاجية.
 
 ## المتغيرات المطلوبة لتشغيل البوت
 
@@ -21,14 +21,14 @@ BOT_MASTER=<اسم حساب الماستر الذي يدير نسخة الاخت
 
 ```dotenv
 GITHUB_SYNC=1
-GITHUB_REPO=zidaan11223344-coder/Talkin-ID-Data
+GITHUB_REPO=zidaan11223344-coder/Talkin4
 GITHUB_BRANCH=main
 GITHUB_DATA_DIR=bot_data
 GITHUB_TOKEN=<REDACTED_IN_ARCHIVE>
 GITHUB_JSON_MIRROR=1
 ```
 
-أنشئ Fine-grained Personal Access Token بصلاحية **Contents: Read and write** على مستودع `Talkin-ID-Data` وحده، ثم خزّنه في خانة الأسرار لدى منصة التشغيل. لا تضعه في ملف أو محادثة. إذا لم تضبط `GITHUB_TOKEN` فاترك `GITHUB_SYNC=0`؛ الوضع الافتراضي في `.env.example` معطّل عمدًا.
+أنشئ Fine-grained Personal Access Token بصلاحية **Contents: Read and write** على مستودع `Talkin4` وحده، ثم خزّنه في خانة الأسرار لدى منصة التشغيل. لا تضعه في ملف أو محادثة. إذا لم تضبط `GITHUB_TOKEN` فلن يبدأ الاسترجاع؛ بعد ضبطه اترك `GITHUB_SYNC=1` لتفعيل الاسترجاع والمزامنة عند أول تشغيل.
 
 يوصى أيضًا بتعيين مجلد تخزين دائم خاص بالاختبار، مثل:
 

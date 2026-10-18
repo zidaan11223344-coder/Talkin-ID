@@ -3,7 +3,7 @@
 ضع هذه المتغيرات في Environment Variables / Secrets في مكان تشغيل البوت:
 
 GITHUB_SYNC=1
-GITHUB_REPO=zidaan11223344-coder/Talkin1
+GITHUB_REPO=zidaan11223344-coder/Talkin4
 GITHUB_BRANCH=main
 GITHUB_DATA_DIR=bot_data
 GITHUB_TOKEN=<REDACTED_IN_ARCHIVE>

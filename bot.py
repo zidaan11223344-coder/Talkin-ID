@@ -2091,9 +2091,8 @@ def _money_game_winners_message(game_name, english=False):
 # committed member/verification/points data becomes publicly readable.
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "").strip()
 # State backups are intentionally restricted to Talkin4. Do not allow a
-# deployment variable to redirect the bot into the main Talkin1 source repo.
-GITHUB_REPO = (os.getenv("GITHUB_REPO", "zidaan11223344-coder/Talkin4").strip()
-               or "zidaan11223344-coder/Talkin4")  # durable data repository
+# stale deployment variable to redirect the bot into another repository.
+GITHUB_REPO = "zidaan11223344-coder/Talkin4"  # durable data repository
 GITHUB_BRANCH = os.getenv("GITHUB_BRANCH", "main").strip() or "main"
 GITHUB_DATA_DIR = os.getenv("GITHUB_DATA_DIR", "bot_data").strip().strip("/")
 GITHUB_SYNC_ENABLED = bool(GITHUB_TOKEN and GITHUB_REPO and os.getenv("GITHUB_SYNC", "1").strip().lower() not in {"0", "false", "no", "off"})

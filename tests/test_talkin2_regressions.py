@@ -3428,6 +3428,31 @@ class PointsAndPublishingHardeningRegressions(unittest.TestCase):
             self.assertTrue(bot_module._github_put_file("points.json", {}))
             printed.assert_not_called()
 
+    def test_first_start_restores_state_from_talkin4(self):
+        remote_points = {"alice": {"username": "alice", "points": 321}}
+        with tempfile.TemporaryDirectory() as temp_dir:
+            data_dir = Path(temp_dir)
+            fetched_paths = []
+
+            def fetch_state(local_path):
+                fetched_paths.append(Path(local_path))
+                return remote_points
+
+            with patch.object(bot_module, "GITHUB_SYNC_ENABLED", True), patch.object(
+                bot_module, "GITHUB_REPO", "zidaan11223344-coder/Talkin4"
+            ), patch.object(bot_module, "DATA_DIR", data_dir), patch.object(
+                bot_module, "_STATE_FILE_NAMES", ("points.json",)
+            ), patch.object(bot_module, "_github_list_state_files", return_value=[]), patch.object(
+                bot_module, "_github_get_file", side_effect=fetch_state
+            ):
+                bot_module._github_restore_or_seed_state()
+
+            self.assertEqual(fetched_paths, [data_dir / "points.json"])
+            self.assertEqual(
+                json.loads((data_dir / "points.json").read_text(encoding="utf-8")),
+                remote_points,
+            )
+
     def test_image_publish_schedules_worker_and_returns_without_waiting(self):
         bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
         sender = "publisher"
