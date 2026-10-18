@@ -351,6 +351,64 @@ class CommandLanguageAndReconnectRegressions(unittest.TestCase):
         state = next(iter(bot._auto_rejoin_state.values()))
         self.assertEqual(len(state["attempts"]), 1)
 
+    def test_auto_rejoin_pauses_after_three_rapid_confirmed_room_exits(self):
+        bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
+        bot.connected_rooms = set()
+        bot._pending_room_joins = {}
+        bot._intentional_leaves = set()
+        bot.blocked_rooms = set()
+        bot._auto_rejoin_lock = threading.Lock()
+        bot._auto_rejoin_pending = set()
+        bot._auto_rejoin_waiting_ack = set()
+        bot._auto_rejoin_paused = set()
+        bot._auto_rejoin_state = {
+            "Hall": {"attempts": [], "joined_at": bot_module.time.monotonic(), "rapid_losses": 0}
+        }
+        bot._connection_generation = 1
+        bot._room_bulk_lock = threading.RLock()
+        bot.log = lambda *_args: None
+        joins, notices = [], []
+        bot.join_room = lambda room, **kwargs: joins.append((room, kwargs)) or True
+        bot.send_private_text = lambda user, text: notices.append((user, text)) or True
+
+        class ImmediateThread:
+            def __init__(self, target=None, **_kwargs):
+                self.target = target
+            def start(self):
+                self.target()
+
+        with patch.object(bot_module.threading, "Thread", ImmediateThread), patch.object(
+            bot_module.time, "sleep", lambda _delay: None
+        ), patch.object(bot_module, "BOT_ID", "test-bot"), patch.object(
+            bot_module, "BOT_MASTER", "Master"
+        ):
+            for expected_joins in (1, 2):
+                bot._schedule_auto_rejoin("Hall", delay=0)
+                self.assertEqual(len(joins), expected_joins)
+                state = bot._auto_rejoin_state["Hall"]
+                bot._auto_rejoin_waiting_ack.discard("Hall")
+                state["joined_at"] = bot_module.time.monotonic()  # server confirmed the rejoin
+            bot._schedule_auto_rejoin("Hall", delay=0)
+
+        self.assertEqual(len(joins), 2)
+        self.assertEqual(bot._auto_rejoin_paused, {"Hall"})
+        self.assertEqual(len(notices), 1)
+        self.assertIn("أوقفت إعادة الدخول التلقائية", notices[0][1])
+        self.assertIn("دخول@اسم_الغرفة", notices[0][1])
+
+    def test_room_departure_notice_is_rate_limited_per_room(self):
+        bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
+        bot.log = lambda *_args: None
+        notices = []
+        bot.send_private_text = lambda user, text: notices.append((user, text)) or True
+        with patch.object(bot_module, "BOT_ID", "test-bot"), patch.object(
+            bot_module, "BOT_MASTER", "Master"
+        ), patch.object(bot_module.time, "monotonic", return_value=100.0):
+            bot._send_master_room_departure_notice("Hall", "user_left")
+            bot._send_master_room_departure_notice("Hall", "user_left")
+        self.assertEqual(len(notices), 1)
+        self.assertIn("إذا تكرر الخروج سريعًا فسيوقف المحاولات", notices[0][1])
+
     def test_auto_rejoin_timeout_does_not_resend_join(self):
         bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
         bot._pending_room_joins = {"hall": {"room": "Hall", "requested_by": ""}}
