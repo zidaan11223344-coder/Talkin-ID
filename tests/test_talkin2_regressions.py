@@ -2589,23 +2589,33 @@ class BotGameAndMusicRegressions(unittest.TestCase):
         self.assertEqual(bot.help_page_part[key], 2)
         self.assertEqual(sent[1][1].split("\n\n📌", 1)[0], bot_module._default_help_sections()[3][1])
 
-    def test_levels_command_opens_first_a3_page_and_initializes_ns_state(self):
+    def test_levels_command_opens_first_progression_page_and_ns_advances(self):
         bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
         bot.help_pages = {}
         bot.help_page_part = {}
         bot.help_game_part = {}
+        bot._result_pages = {}
+        bot._filter_list_state = {}
+        bot._effective_room_language = lambda _room: "ar"
         bot._room_list_commands = lambda *_args: False
-        bot._send_help = lambda **kwargs: calls.append(kwargs)
-        bot._snake_command = lambda *_args: False
-        bot._ludo_command = lambda *_args: False
-        bot._handle_pending_bot_choice = lambda *_args: False
-        calls = []
+        messages = []
+        packets = []
+        bot.send_room_text = lambda room, text: messages.append((room, text))
+        bot.send_query = lambda packet: packets.append(packet) or True
         self.assertTrue(bot._handle_management_command("North", "مستويات", "Player", is_private=False))
-        key = ("North", bot_module._norm_user("Player"))
-        self.assertEqual(bot.help_pages[key], 3)
-        self.assertEqual(bot.help_page_part[key], 1)
-        self.assertEqual(bot.help_game_part[key], 1)
-        self.assertEqual(calls, [{"room": "North", "private_to": None, "page": 3, "game_part": 1}])
+        self.assertEqual(len(messages), 1)
+        self.assertIn("المستوى 1", messages[0][1])
+        self.assertIn("مبتدئ", messages[0][1])
+        self.assertIn("📄 القائمة 1/", messages[0][1])
+
+        result_key = ("room_message", "North", "Player")
+        self.assertGreater(len(bot._result_pages[result_key]["pages"]), 1)
+        self.assertTrue(bot._handle_management_command("North", "ns", "Player", is_private=False))
+        self.assertEqual(bot._result_pages[result_key]["part"], 2)
+        self.assertEqual(len(packets), 1)
+        next_text = bot_module.as_text(bot_module.decode_message(packets[0])[5][0])
+        self.assertIn("📄 القائمة 2/", next_text)
+        self.assertIn("المستوى", next_text)
 
     def test_master_diamond_check_grants_rotating_item_and_sends_room_image(self):
         bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
