@@ -5,7 +5,9 @@ from pathlib import Path
 
 DATA_PATH = Path(os.getenv("BOT_DATA_DIR") or os.getenv("PERSISTENT_DATA_DIR") or Path(__file__).resolve().parent / "data") / "treasure_game.json"
 LOCK = threading.RLock()
-COOLDOWN_SECONDS = 2 * 60 * 60
+COOLDOWN_SECONDS = 30
+DAY_SECONDS = 24 * 60 * 60
+DAILY_DIAMOND_SPAWNS = 15
 
 # weights are relative probabilities; they are normalized automatically.
 ITEMS = {
@@ -65,20 +67,50 @@ def _player(data, user_id, username=""):
     return row
 
 
+def _random_diamond_spawns(start):
+    return sorted(random.uniform(start, start + DAY_SECONDS) for _ in range(DAILY_DIAMOND_SPAWNS))
+
+
+def _diamond_schedule(data, now):
+    schedule = data.get("diamond_schedule")
+    if not isinstance(schedule, dict) or not isinstance(schedule.get("times"), list):
+        cycle_end = now + DAY_SECONDS
+        schedule = {"cycle_end": cycle_end, "times": _random_diamond_spawns(now)}
+    else:
+        cycle_end = float(schedule.get("cycle_end", 0) or 0)
+        times = [float(value) for value in schedule.get("times", [])]
+        if cycle_end <= 0:
+            cycle_end = now + DAY_SECONDS
+            times = _random_diamond_spawns(now)
+        while now >= cycle_end:
+            # Unclaimed spawns expire at the end of their 24-hour cycle.
+            times = _random_diamond_spawns(cycle_end)
+            cycle_end += DAY_SECONDS
+        schedule = {"cycle_end": cycle_end, "times": sorted(times)}
+    data["diamond_schedule"] = schedule
+    return schedule
+
+
 def mine(user_id, username="", now=None):
-    """Start one attempt per two hours, persisting cooldown before rolling reward."""
+    """Mine every 30 seconds; the first miner after a random daily spawn gets a diamond."""
     now = float(now if now is not None else time.time())
     with LOCK:
         data = _load(); row = _player(data, user_id, username)
         remaining = COOLDOWN_SECONDS - (now - float(row.get("last_mine", 0) or 0))
         if remaining > 0:
             return {"ok": False, "remaining": int(remaining)}
-        # Save the cooldown before the result is produced to prevent duplicate attempts.
         row["last_mine"] = now
-        _save(data)
-        pool = [(None, FAIL_WEIGHT)] + [(k, float(v["weight"])) for k, v in ITEMS.items()]
-        chosen = random.choices([p[0] for p in pool], weights=[p[1] for p in pool], k=1)[0]
+        schedule = _diamond_schedule(data, now)
+        if schedule["times"] and schedule["times"][0] <= now:
+            schedule["times"].pop(0)
+            diamond_items = [(k, float(v["weight"])) for k, v in ITEMS.items() if v["diamond"]]
+            chosen = random.choices([p[0] for p in diamond_items], weights=[p[1] for p in diamond_items], k=1)[0]
+        else:
+            # Diamonds are available only through the 15 randomized daily spawns.
+            pool = [(None, FAIL_WEIGHT)] + [(k, float(v["weight"])) for k, v in ITEMS.items() if not v["diamond"]]
+            chosen = random.choices([p[0] for p in pool], weights=[p[1] for p in pool], k=1)[0]
         if chosen is None:
+            _save(data)
             return {"ok": True, "found": False}
         row["inventory"][chosen] = int(row["inventory"].get(chosen, 0) or 0) + 1
         item = ITEMS[chosen]
@@ -139,6 +171,8 @@ def finish_redemption(txid, success):
 
 
 def format_cooldown(seconds):
-    seconds = max(0, int(seconds)); hours, rem = divmod(seconds, 3600); minutes = rem // 60
+    seconds = max(0, int(seconds)); hours, rem = divmod(seconds, 3600); minutes, seconds = divmod(rem, 60)
     if hours: return f"{hours} ساعة و{minutes} دقيقة"
-    return f"{minutes} دقيقة"
+    if minutes and seconds: return f"{minutes} دقيقة و{seconds} ثانية"
+    if minutes: return f"{minutes} دقيقة"
+    return f"{seconds} ثانية"
