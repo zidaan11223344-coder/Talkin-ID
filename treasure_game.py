@@ -14,12 +14,12 @@ ITEMS = {
     "نحاس": {"label": "النحاس", "symbol": "🪙", "points": 5, "weight": 27.0, "diamond": False, "image": "treasure_copper.png"},
     "حديد": {"label": "الحديد", "symbol": "⚙️", "points": 15, "weight": 18.0, "diamond": False, "image": "treasure_iron.png"},
     "ياقوت": {"label": "الياقوت الأحمر", "symbol": "❤️", "points": 50, "weight": 8.0, "diamond": False, "image": "treasure_ruby.png"},
-    "الماس": {"label": "الألماس العادي", "symbol": "💎", "points": 100, "weight": 4.0, "diamond": True, "image": "diamond_normal.png"},
-    "الماس_ازرق": {"label": "الألماس الأزرق النادر", "symbol": "💙", "points": 250, "weight": 1.5, "diamond": True, "image": "diamond_blue.png"},
-    "الماس_بنفسجي": {"label": "الألماس البنفسجي النادر جداً", "symbol": "💜", "points": 500, "weight": 0.8, "diamond": True, "image": "diamond_purple.png"},
-    "الماس_احمر": {"label": "الألماس الأحمر الأسطوري", "symbol": "❤️", "points": 1000, "weight": 0.4, "diamond": True, "image": "diamond_red.png"},
-    "الماس_اسود": {"label": "الألماس الأسود شديد الندرة", "symbol": "🖤", "points": 2500, "weight": 0.2, "diamond": True, "image": "diamond_black.png"},
-    "الماس_ملكي": {"label": "الألماس الملكي", "symbol": "👑", "points": 5000, "weight": 0.1, "diamond": True, "image": "diamond_royal.png"},
+    "الماس": {"label": "الألماس العادي", "symbol": "💎", "points": 100, "weight": 4.0, "diamond": True, "image": "diamond_normal.jpg"},
+    "الماس_ازرق": {"label": "الألماس الأزرق النادر", "symbol": "💙", "points": 250, "weight": 1.5, "diamond": True, "image": "diamond_blue.jpg"},
+    "الماس_بنفسجي": {"label": "الألماس البنفسجي النادر جداً", "symbol": "💜", "points": 500, "weight": 0.8, "diamond": True, "image": "diamond_purple.jpg"},
+    "الماس_احمر": {"label": "الألماس الأحمر الأسطوري", "symbol": "❤️", "points": 1000, "weight": 0.4, "diamond": True, "image": "diamond_red.jpg"},
+    "الماس_اسود": {"label": "الألماس الأسود شديد الندرة", "symbol": "🖤", "points": 2500, "weight": 0.2, "diamond": True, "image": "diamond_black.jpg"},
+    "الماس_ملكي": {"label": "الألماس الملكي", "symbol": "👑", "points": 5000, "weight": 0.1, "diamond": True, "image": "diamond_royal.jpg"},
 }
 FAIL_WEIGHT = 40.0
 ALIASES = {

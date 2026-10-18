@@ -2693,8 +2693,8 @@ class BotGameAndMusicRegressions(unittest.TestCase):
         bot.send_room_text = lambda room, text: sent.append(("text", room, text))
         bot.send_room_media = lambda room, url, kind, duration=0: sent.append(("media", room, url, kind)) or True
         diamond_results = [
-            {"ok": True, "label": "الألماس العادي", "image": "diamond_normal.png", "points": 100},
-            {"ok": True, "label": "الألماس الأزرق النادر", "image": "diamond_blue.png", "points": 250},
+            {"ok": True, "label": "الألماس العادي", "image": "diamond_normal.jpg", "points": 100},
+            {"ok": True, "label": "الألماس الأزرق النادر", "image": "diamond_blue.jpg", "points": 250},
         ]
         self.assertTrue(bot_module._looks_like_bot_command("فحص الماس"))
         with patch.object(bot_module, "_is_master_name", return_value=True), patch.object(
@@ -2706,8 +2706,8 @@ class BotGameAndMusicRegressions(unittest.TestCase):
         media = [entry for entry in sent if entry[0] == "media"]
         self.assertEqual(len(media), 2)
         self.assertTrue(all(entry[1] == "North" and entry[3] == "image" for entry in media))
-        self.assertIn("diamond_normal.png", media[0][2])
-        self.assertIn("diamond_blue.png", media[1][2])
+        self.assertIn("diamond_normal.jpg", media[0][2])
+        self.assertIn("diamond_blue.jpg", media[1][2])
 
     def test_diamond_check_rejects_non_master(self):
         bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
