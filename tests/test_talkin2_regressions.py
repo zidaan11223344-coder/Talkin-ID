@@ -2662,9 +2662,15 @@ class BotGameAndMusicRegressions(unittest.TestCase):
         bot.send_query = lambda packet: packets.append(packet) or True
         self.assertTrue(bot._handle_management_command("North", "مستويات", "Player", is_private=False))
         self.assertEqual(len(messages), 1)
-        self.assertIn("المستوى 1", messages[0][1])
+        first_page = messages[0][1]
+        self.assertLess(first_page.index("📄 القائمة 1/"), first_page.index("📚 مستويات تقدم الألعاب"))
+        self.assertIn("المستوى الفضي", first_page)
+        self.assertIn("⭐ النجوم الفضية", first_page)
+        self.assertIn("1: ⭐ — مبتدئ", first_page)
+        self.assertIn("2: ⭐⭐ — لاعب ناشئ", first_page)
+        self.assertNotIn("من 0 إلى", first_page)
         self.assertIn("مبتدئ", messages[0][1])
-        self.assertIn("📄 القائمة 1/", messages[0][1])
+        self.assertIn("كل مستوى يحتاج 500 لعبة", first_page)
 
         result_key = ("room_message", "North", "Player")
         self.assertGreater(len(bot._result_pages[result_key]["pages"]), 1)

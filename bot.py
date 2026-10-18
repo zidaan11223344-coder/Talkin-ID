@@ -4481,7 +4481,7 @@ def _points_threshold_top_message(threshold, label, *, english=False, limit=POIN
     return "\n".join(lines)
 
 
-def _safe_text_pages_from_items(packet_type, route_fields, heading_lines, item_lines, *, max_items_per_page=None, language="ar"):
+def _safe_text_pages_from_items(packet_type, route_fields, heading_lines, item_lines, *, max_items_per_page=None, language="ar", marker_first=False):
     """Build numbered list pages whose complete protobuf packets fit the WS limit."""
     limit = _ws_payload_limit()
     english = str(language or "ar").casefold() == "en"
@@ -4489,11 +4489,10 @@ def _safe_text_pages_from_items(packet_type, route_fields, heading_lines, item_l
     next_footer = "\n\n📌 Type ns for the next list." if english else "\n\n📌 اكتب ns للقائمة التالية."
 
     def render(items, page_no, total):
-        return "\n".join([
-            *[str(line) for line in heading_lines],
-            f"{marker} {page_no}/{total}",
-            *items,
-        ])
+        page_marker = f"{marker} {page_no}/{total}"
+        headings = [str(line) for line in heading_lines]
+        ordered_lines = [page_marker, *headings] if marker_first else [*headings, page_marker]
+        return "\n".join([*ordered_lines, *items])
 
     def packet_size(text):
         fields = dict(route_fields or {})
@@ -17422,32 +17421,45 @@ class TalkinBot:
         if _body_low == "مستويات":
             language = self._effective_room_language(room) if room and not is_private else "ar"
             english = str(language or "ar").casefold() == "en"
-            item_lines = []
+            item_blocks = []
             for tier_index in range(len(GAME_LEVEL_TIERS) + 1):
+                tier_start = tier_index * GAMES_PER_TIER
+                _level, _title, _plays, category, symbol, _tier = _game_level_details_from_plays(tier_start)
+                if tier_index < len(GAME_LEVEL_TIERS):
+                    tier_label = {
+                        "النجوم الفضية": "المستوى الفضي",
+                        "النجوم الذهبية": "المستوى الذهبي",
+                        "الماس الأزرق": "المستوى الماسي الأزرق",
+                        "الماس البرونزي": "المستوى الماسي البرونزي",
+                        "الماس الأحمر": "المستوى الماسي الأحمر",
+                        "الماس الأسود": "المستوى الماسي الأسود",
+                        "الماس البنفسجي": "المستوى الماسي البنفسجي",
+                        "الماس الملكي": "المستوى الماسي الملكي",
+                    }.get(category, f"المستوى {category}")
+                else:
+                    tier_label = f"المستوى {category}"
+                block = [tier_label, f"{symbol} {category}"]
                 for level_in_tier in range(1, GAME_LEVELS_PER_TIER + 1):
-                    plays = tier_index * GAMES_PER_TIER + (level_in_tier - 1) * GAMES_PER_LEVEL
-                    _level, title, _plays, category, symbol, _tier = _game_level_details_from_plays(plays)
-                    global_level = tier_index * GAME_LEVELS_PER_TIER + level_in_tier
-                    last_play = plays + GAMES_PER_LEVEL - 1
-                    if english:
-                        item_lines.append(f"{symbol} Level {global_level}: {title} — {category} — {plays:,}–{last_play:,} games")
-                    else:
-                        item_lines.append(f"{symbol} المستوى {global_level}: {title} — {category} — من {plays:,} إلى {last_play:,} لعبة")
-            item_lines.append(
-                "بعد المستوى 90 تستمر فئات الماس الملكي تلقائياً، وكل فئة جديدة تضم 10 مستويات."
+                    plays = tier_start + (level_in_tier - 1) * GAMES_PER_LEVEL
+                    _level, title, _plays, _category, level_symbol, _tier = _game_level_details_from_plays(plays)
+                    item_symbol = level_symbol * level_in_tier
+                    block.append(f"{level_in_tier}: {item_symbol} — {title}")
+                item_blocks.append("\n".join(block))
+            item_blocks.append(
+                "تستمر فئات الماس الملكي المرقمة تلقائياً بعد ذلك."
                 if not english else
-                "After level 90, royal-diamond tiers continue automatically, with 10 levels per tier."
+                "Numbered royal-diamond tiers continue automatically after this."
             )
             headings = (
-                ["📚 Game progression levels", "Each level requires 500 games; titles are shown in Arabic."]
+                ["📚 Game progression levels", "Each level requires 500 games."]
                 if english else
-                ["📚 مستويات تقدم الألعاب", "كل مستوى يحتاج 500 لعبة. القائمة تعرض أول 90 مستوى والفئات التالية تستمر تلقائياً."]
+                ["📚 مستويات تقدم الألعاب", "كل مستوى يحتاج 500 لعبة"]
             )
             packet_type = "chat_message" if is_private else "room_message"
             route_fields = {"to": str(sender or "")} if is_private else {"room": str(room or "")}
             pages = _safe_text_pages_from_items(
-                packet_type, route_fields, headings, item_lines,
-                max_items_per_page=10, language=language,
+                packet_type, route_fields, headings, item_blocks,
+                language=language, marker_first=True,
             )
             self._send_paginated_text_pages(sender, room, packet_type, pages, route_fields, language=language)
             return True
