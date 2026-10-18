@@ -3368,11 +3368,11 @@ GAMES_PER_TIER = GAME_LEVELS_PER_TIER * GAMES_PER_LEVEL
 
 GAME_LEVEL_TIERS = (
     {
-        "name": "النجوم الفضية", "symbol": "⭐",
+        "name": "النجوم الفضية", "symbol": "✩",
         "titles": ("مبتدئ", "لاعب ناشئ", "مقاتل", "برونزي", "فضي", "ذهبي", "محترف", "خبير", "أسطورة", "أسطورة فضية"),
     },
     {
-        "name": "النجوم الذهبية", "symbol": "🌟",
+        "name": "النجوم الذهبية", "symbol": "⭐",
         "titles": ("ذهبي مبتدئ", "محارب ذهبي", "ذهبي محترف", "ذهبي متألق", "ذهبي نادر", "أمير الذهب", "فارس الذهب", "قائد الذهب", "أسطورة الذهب", "ملك الذهب"),
     },
     {
@@ -3380,24 +3380,32 @@ GAME_LEVEL_TIERS = (
         "titles": ("ماسي مبتدئ", "ماسي متألق", "ماسي محترف", "فارس الماس", "الماسي النادر", "أمير الماس", "قائد الماس", "أسطورة الماس", "إمبراطور الماس", "ملك الماس الأزرق"),
     },
     {
-        "name": "الماس البرونزي", "symbol": "🟤",
+        "name": "الماس البرونزي", "symbol": "🔶",
         "titles": ("برونزي نادر", "فارس البرونز", "برونزي محترف", "البرونزي المتألق", "سيد البرونز", "أمير البرونز", "قائد البرونز", "أسطورة البرونز", "إمبراطور البرونز", "ملك الماس البرونزي"),
     },
     {
-        "name": "الماس الأحمر", "symbol": "❤️",
+        "name": "الماس الأحمر", "symbol": "♦️",
         "titles": ("أحمر نادر", "محارب الماس الأحمر", "أحمر محترف", "فارس الماس الأحمر", "أمير الماس الأحمر", "قائد الماس الأحمر", "أسطورة الماس الأحمر", "سيد الماس الأحمر", "إمبراطور الماس الأحمر", "ملك الماس الأحمر"),
     },
     {
-        "name": "الماس الأسود", "symbol": "🖤",
+        "name": "الماس الأسود", "symbol": "◆",
         "titles": ("أسود مبتدئ", "محارب الماس الأسود", "أسود محترف", "فارس الماس الأسود", "الماسي الأسود النادر", "أمير الماس الأسود", "قائد الماس الأسود", "أسطورة الماس الأسود", "إمبراطور الماس الأسود", "ملك الماس الأسود"),
     },
     {
-        "name": "الماس البنفسجي", "symbol": "💜",
+        "name": "الماس البنفسجي", "symbol": "🟣💎",
         "titles": ("بنفسجي مبتدئ", "محارب الماس البنفسجي", "بنفسجي محترف", "فارس الماس البنفسجي", "الماسي البنفسجي النادر", "أمير الماس البنفسجي", "قائد الماس البنفسجي", "أسطورة الماس البنفسجي", "إمبراطور الماس البنفسجي", "ملك الماس البنفسجي"),
     },
     {
         "name": "الماس الملكي", "symbol": "👑",
-        "titles": ("ملكي مبتدئ", "محارب الماس الملكي", "ملكي محترف", "فارس الماس الملكي", "الماسي الملكي النادر", "أمير الماس الملكي", "قائد الماس الملكي", "أسطورة الماس الملكي", "إمبراطور الماس الملكي", "ملك الماس الملكي"),
+        "titles": ("ملكي مبتدئ", "محارب الماس الملكي", "ملكي محترف", "فارس الماس الملكي", "الماسي الملكي النادر", "أمير الماس الملكي", "قائد الماس الملكي", "أسطورة الماس الملكي", "إمبراطور الماس الملكي", "تاج الملوك الأبدي"),
+    },
+    {
+        "name": "الماس الخالد", "symbol": "💠",
+        "titles": ("خالد مبتدئ", "محارب الخلود", "خالد محترف", "فارس الخلود", "الماسي الخالد النادر", "أمير الخلود", "قائد الخلود", "أسطورة الخلود", "إمبراطور الخلود", "تاج الخلود"),
+    },
+    {
+        "name": "الماس الكوني", "symbol": "🔷",
+        "titles": ("كوني مبتدئ", "محارب الكون", "كوني محترف", "فارس الكون", "الماسي الكوني النادر", "أمير الكون", "قائد الكون", "أسطورة الكون", "إمبراطور الكون", "سيّد المجرات"),
     },
 )
 
@@ -3417,10 +3425,10 @@ def _game_level_details_from_plays(plays):
         category = tier["name"]
         symbol = tier["symbol"]
     else:
-        # يستمر النظام بلا سقف؛ بعد الفئات المعرفة تُنشأ فئات ملكية مرقمة تلقائياً.
+        # يستمر النظام بلا سقف؛ بعد الفئات المعرفة تُنشأ فئات كونية مرقمة تلقائياً.
         extra_index = tier_index - len(GAME_LEVEL_TIERS) + 1
-        category = f"الماس الملكي {extra_index}"
-        symbol = "👑"
+        category = f"الماس الكوني {extra_index}"
+        symbol = "🔷"
         title = ("مغامر " + category if level == 1 else
                  "محارب " + category if level == 2 else
                  "محترف " + category if level == 3 else
@@ -17422,7 +17430,7 @@ class TalkinBot:
             language = self._effective_room_language(room) if room and not is_private else "ar"
             english = str(language or "ar").casefold() == "en"
             item_blocks = []
-            for tier_index in range(len(GAME_LEVEL_TIERS) + 1):
+            for tier_index in range(len(GAME_LEVEL_TIERS)):
                 tier_start = tier_index * GAMES_PER_TIER
                 _level, _title, _plays, category, symbol, _tier = _game_level_details_from_plays(tier_start)
                 if tier_index < len(GAME_LEVEL_TIERS):
@@ -17435,21 +17443,20 @@ class TalkinBot:
                         "الماس الأسود": "المستوى الماسي الأسود",
                         "الماس البنفسجي": "المستوى الماسي البنفسجي",
                         "الماس الملكي": "المستوى الماسي الملكي",
+                        "الماس الخالد": "المستوى الماسي الخالد",
+                        "الماس الكوني": "المستوى الماسي الكوني",
                     }.get(category, f"المستوى {category}")
                 else:
                     tier_label = f"المستوى {category}"
-                block = [tier_label, f"{symbol} {category}"]
+                block = [tier_label, symbol * 10]
                 for level_in_tier in range(1, GAME_LEVELS_PER_TIER + 1):
                     plays = tier_start + (level_in_tier - 1) * GAMES_PER_LEVEL
                     _level, title, _plays, _category, level_symbol, _tier = _game_level_details_from_plays(plays)
-                    item_symbol = level_symbol * level_in_tier
-                    block.append(f"{level_in_tier}: {item_symbol} — {title}")
+                    if english:
+                        block.append(f"Level {level_in_tier}: {title}")
+                    else:
+                        block.append(f"مستوى {level_in_tier}: {title}")
                 item_blocks.append("\n".join(block))
-            item_blocks.append(
-                "تستمر فئات الماس الملكي المرقمة تلقائياً بعد ذلك."
-                if not english else
-                "Numbered royal-diamond tiers continue automatically after this."
-            )
             headings = (
                 ["📚 Game progression levels", "Each level requires 500 games."]
                 if english else
@@ -17459,7 +17466,7 @@ class TalkinBot:
             route_fields = {"to": str(sender or "")} if is_private else {"room": str(room or "")}
             pages = _safe_text_pages_from_items(
                 packet_type, route_fields, headings, item_blocks,
-                language=language, marker_first=True,
+                max_items_per_page=1, language=language, marker_first=True,
             )
             self._send_paginated_text_pages(sender, room, packet_type, pages, route_fields, language=language)
             return True

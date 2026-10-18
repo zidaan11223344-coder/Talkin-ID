@@ -1438,7 +1438,7 @@ class BotGameAndMusicRegressions(unittest.TestCase):
             self.assertIn("📊 المستوى: 1", welcome)
             self.assertIn("🏆 اللقب: مبتدئ", welcome)
             self.assertIn("🎮 عدد الألعاب: 0", welcome)
-            self.assertEqual(welcome.count("⭐"), 1)
+            self.assertEqual(welcome.count("✩"), 1)
 
     def test_game_level_welcome_starts_at_exactly_50_games(self):
         with patch.object(bot_module, "_game_stats_data", return_value={
@@ -1472,24 +1472,29 @@ class BotGameAndMusicRegressions(unittest.TestCase):
 
     def test_game_level_tier_boundaries_and_titles(self):
         expected = {
-            0: (1, "مبتدئ", "النجوم الفضية", "⭐"),
-            500: (2, "لاعب ناشئ", "النجوم الفضية", "⭐"),
-            1000: (3, "مقاتل", "النجوم الفضية", "⭐"),
-            2500: (6, "ذهبي", "النجوم الفضية", "⭐"),
-            4500: (10, "أسطورة فضية", "النجوم الفضية", "⭐"),
-            4999: (10, "أسطورة فضية", "النجوم الفضية", "⭐"),
-            5000: (1, "ذهبي مبتدئ", "النجوم الذهبية", "🌟"),
-            7000: (5, "ذهبي نادر", "النجوم الذهبية", "🌟"),
-            9500: (10, "ملك الذهب", "النجوم الذهبية", "🌟"),
+            0: (1, "مبتدئ", "النجوم الفضية", "✩"),
+            500: (2, "لاعب ناشئ", "النجوم الفضية", "✩"),
+            1000: (3, "مقاتل", "النجوم الفضية", "✩"),
+            2500: (6, "ذهبي", "النجوم الفضية", "✩"),
+            4500: (10, "أسطورة فضية", "النجوم الفضية", "✩"),
+            4999: (10, "أسطورة فضية", "النجوم الفضية", "✩"),
+            5000: (1, "ذهبي مبتدئ", "النجوم الذهبية", "⭐"),
+            7000: (5, "ذهبي نادر", "النجوم الذهبية", "⭐"),
+            9500: (10, "ملك الذهب", "النجوم الذهبية", "⭐"),
             10000: (1, "ماسي مبتدئ", "الماس الأزرق", "💎"),
             12500: (6, "أمير الماس", "الماس الأزرق", "💎"),
-            15000: (1, "برونزي نادر", "الماس البرونزي", "🟤"),
-            20000: (1, "أحمر نادر", "الماس الأحمر", "❤️"),
-            25000: (1, "أسود مبتدئ", "الماس الأسود", "🖤"),
-            30000: (1, "بنفسجي مبتدئ", "الماس البنفسجي", "💜"),
+            15000: (1, "برونزي نادر", "الماس البرونزي", "🔶"),
+            20000: (1, "أحمر نادر", "الماس الأحمر", "♦️"),
+            25000: (1, "أسود مبتدئ", "الماس الأسود", "◆"),
+            30000: (1, "بنفسجي مبتدئ", "الماس البنفسجي", "🟣💎"),
             35000: (1, "ملكي مبتدئ", "الماس الملكي", "👑"),
-            40000: (1, "مغامر الماس الملكي 1", "الماس الملكي 1", "👑"),
-            1000000: (1, "مغامر الماس الملكي 193", "الماس الملكي 193", "👑"),
+            39500: (10, "تاج الملوك الأبدي", "الماس الملكي", "👑"),
+            40000: (1, "خالد مبتدئ", "الماس الخالد", "💠"),
+            44500: (10, "تاج الخلود", "الماس الخالد", "💠"),
+            45000: (1, "كوني مبتدئ", "الماس الكوني", "🔷"),
+            49500: (10, "سيّد المجرات", "الماس الكوني", "🔷"),
+            50000: (1, "مغامر الماس الكوني 1", "الماس الكوني 1", "🔷"),
+            1000000: (1, "مغامر الماس الكوني 191", "الماس الكوني 191", "🔷"),
         }
         for plays, wanted in expected.items():
             with self.subTest(plays=plays):
@@ -2663,23 +2668,39 @@ class BotGameAndMusicRegressions(unittest.TestCase):
         self.assertTrue(bot._handle_management_command("North", "مستويات", "Player", is_private=False))
         self.assertEqual(len(messages), 1)
         first_page = messages[0][1]
-        self.assertLess(first_page.index("📄 القائمة 1/"), first_page.index("📚 مستويات تقدم الألعاب"))
+        self.assertLess(first_page.index("📄 القائمة 1/10"), first_page.index("📚 مستويات تقدم الألعاب"))
         self.assertIn("المستوى الفضي", first_page)
-        self.assertIn("⭐ النجوم الفضية", first_page)
-        self.assertIn("1: ⭐ — مبتدئ", first_page)
-        self.assertIn("2: ⭐⭐ — لاعب ناشئ", first_page)
+        self.assertIn("✩✩✩✩✩✩✩✩✩✩", first_page)
+        self.assertIn("مستوى 1: مبتدئ", first_page)
+        self.assertNotIn("مستوى 1: ✩", first_page)
         self.assertNotIn("من 0 إلى", first_page)
         self.assertIn("مبتدئ", messages[0][1])
         self.assertIn("كل مستوى يحتاج 500 لعبة", first_page)
 
         result_key = ("room_message", "North", "Player")
-        self.assertGreater(len(bot._result_pages[result_key]["pages"]), 1)
+        raw_pages = bot._result_pages[result_key]["pages"]
+        self.assertEqual(len(raw_pages), 10)
+        first_level_lines = [line for line in raw_pages[0].splitlines() if line.startswith("مستوى ")]
+        self.assertEqual(len(first_level_lines), 10)
+        self.assertTrue(all(line.startswith(f"مستوى {index}: ") for index, line in enumerate(first_level_lines, 1)))
+        self.assertEqual(next(line for line in raw_pages[0].splitlines() if line.startswith("✩")), "✩" * 10)
+        second_page = raw_pages[1]
+        self.assertIn("📄 القائمة 2/10", second_page)
+        self.assertEqual(next(line for line in second_page.splitlines() if line.startswith("⭐")), "⭐" * 10)
+        red_page = raw_pages[4]
+        self.assertIn("♦️" * 10, red_page)
+        self.assertNotIn("❤️", red_page)
+        self.assertIn("المستوى الماسي الخالد", raw_pages[8])
+        self.assertIn("تاج الخلود", raw_pages[8])
+        self.assertIn("المستوى الماسي الكوني", raw_pages[9])
+        self.assertIn("سيّد المجرات", raw_pages[9])
+        self.assertEqual(len({line.split(": ", 1)[1] for page in raw_pages for line in page.splitlines() if line.startswith("مستوى ")}), 100)
         self.assertTrue(bot._handle_management_command("North", "ns", "Player", is_private=False))
         self.assertEqual(bot._result_pages[result_key]["part"], 2)
         self.assertEqual(len(packets), 1)
         next_text = bot_module.as_text(bot_module.decode_message(packets[0])[5][0])
-        self.assertIn("📄 القائمة 2/", next_text)
-        self.assertIn("المستوى", next_text)
+        self.assertIn("📄 القائمة 2/10", next_text)
+        self.assertIn("مستوى 1:", next_text)
 
     def test_master_diamond_check_grants_rotating_item_and_sends_room_image(self):
         bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
