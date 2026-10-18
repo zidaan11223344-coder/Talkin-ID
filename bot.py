@@ -18725,7 +18725,7 @@ class TalkinBot:
             else: self.send_room_text(room, searching)
             time.sleep(1.0)
             if not result.get("found"):
-                reply = "🔎 لم يتم العثور على كنز هذه المرة. يمكنك المحاولة مجدداً بعد ساعتين."
+                reply = "🔎 لم يتم العثور على كنز هذه المرة. يمكنك المحاولة مجدداً بعد 30 ثانية."
             else:
                 reply = f"💎 نتيجة التنقيب\n━━━━━━━━━━━━\n⛏️ عثرت على: {result['label']}\n🎒 أُضيف إلى مخزونك.\n🛒 قيمة الاستبدال: {result['points']:,} نقطة للقطعة."
             if is_private: self.send_private_text(sender, reply)
