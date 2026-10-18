@@ -3076,6 +3076,7 @@ def _looks_like_bot_command(text):
         "+sr@", "sr@", "swc", "خاص@", "رسالة@", "broadcast@", "mf@", "+mf@", "-mf@", "l@mf", "l@sr", "l@mbp", "l@a", "l@m", "l@o", "l@b", "is@", "mbp@", "clear@mf", "دخول الكل", "دخولكل", "اضف لملف الغرف", "أضف لملف الغرف", "تشغيل الدعوات", "ايقاف الدعوات", "إيقاف الدعوات", "تشغيل الالعاب", "تشغيل الألعاب", "ايقاف الالعاب", "إيقاف الالعاب", "ايقاف الألعاب", "إيقاف الألعاب", "s@", "صورتي", "صورتك", ".صوره", ".صوره@", "شبيه@", "شبيه ", "شبيهك@", "شبيهك ",
         ".دخول غرفي", "دخول غرفي", "دخولغرفي", "my rooms", "start verification", "stop verification", "تشغيل التوثيق", "إيقاف التوثيق", "ايقاف التوثيق",
     )
+    prefixes = prefixes + ("فحص الماس", "فحص الالماس", "فحص الألماس")
     prefixes = prefixes + (
         "bl@", "+ds@", "رهان ", "مضاربه ", "استثمار ", "حظي ",
         "ذهب ", "الذهب ", "فضة ", "الفضة ", "فضه ", "الفضه ",
@@ -5067,14 +5068,14 @@ def _default_help_sections():
             '📋 أوامر الإدارة — 3 | التوثيق وVIP\n━━━━━━━━━━━━\nvi@اسم — توثيق مستخدم\nuns@اسم — سحب التوثيق\nسحب التوثيق@اسم — سحب التوثيق\nإزالة توثيق@اسم — سحب التوثيق\nتوثيق الكل — توثيق كل الأعضاء\nvi — عدد الموثقين\nvip@اسم — منح VIP\nunvip@اسم — سحب VIP\nvip — عدد أعضاء VIP\nmvip@اسم — إضافة ماستر توثيق\numvip@اسم — سحب ماستر توثيق\nl@mvip — عرض ماسترات التوثيق',
             '📋 أوامر الإدارة — 4 | التوثيق والحماية\n━━━━━━━━━━━━\nتشغيل التوثيق — تشغيل نظام التوثيق\nإيقاف التوثيق — إيقاف نظام التوثيق\nحماية@اسم_الغرفة — قائمة الحماية الخاصة بالماستر\nتشغيل/إيقاف الحماية — إعداد عام للغرفة\nحالة الحماية — عرض الحالة\nحمايه البوت — حماية داخلية للبوت\nالمحظورين — المحظورون داخل البوت',
             '📋 أوامر الإدارة — 5 | الفلتر والنشر\n━━━━━━━━━━━━\nmf@on — تشغيل فلتر الكلمات\nmf@off — إيقاف فلتر الكلمات\n+mf@كلمة — إضافة كلمة للفلتر\n-mf@كلمة — حذف كلمة من الفلتر\nl@mf — عرض كلمات الفلتر\nclear@mf — مسح كلمات الفلتر\nl@mfb — عرض المحظورين بسبب الفلتر\nl@mbp — عرض الممنوعين من النشر\nmbp@اسم — فك منع النشر\namf@اسم — استثناء مستخدم من حظر الفلتر',
-            '📋 أوامر الإدارة — 6 | أوامر متقدمة\n━━━━━━━━━━━━\nحالة البوت — حالة الاتصال\nرام / cpu — الموارد\nتنظيف — حذف الملفات المؤقتة\nنسخ احتياطي — إنشاء نسخة\nإعادة تشغيل البوت — إعادة تشغيل الخدمة\nتشغيل/إيقاف الدعوات\nتشغيل/إيقاف الألعاب\nغرفي / myrooms — الغرف المتصلة\nدخول الكل / دخولكل / .دخول غرفي — دخول الغرف المحفوظة\nاضف لملف الغرف — حفظ الغرف\ninv / دعوات / invite — جلب أعضاء الغرفة\ns@اسم / is@اسم — البحث عن مستخدم\nl@a / l@m / l@o / l@b — قوائم الرتب',
+            '📋 أوامر الإدارة — 6 | أوامر متقدمة\n━━━━━━━━━━━━\nحالة البوت — حالة الاتصال\nرام / cpu — الموارد\nفحص الماس — منح ألماسة اختبارية متغيرة النوع وصورتها في الغرفة\nتنظيف — حذف الملفات المؤقتة\nنسخ احتياطي — إنشاء نسخة\nإعادة تشغيل البوت — إعادة تشغيل الخدمة\nتشغيل/إيقاف الدعوات\nتشغيل/إيقاف الألعاب\nغرفي / myrooms — الغرف المتصلة\nدخول الكل / دخولكل / .دخول غرفي — دخول الغرف المحفوظة\nاضف لملف الغرف — حفظ الغرف\ninv / دعوات / invite — جلب أعضاء الغرفة\ns@اسم / is@اسم — البحث عن مستخدم\nl@a / l@m / l@o / l@b — قوائم الرتب',
         ],
         2: [
             '🎵 الموسيقى — 1\n━━━━━━━━━━━━\n.sa اسم الأغنية — تشغيل أغنية\nsher@اسم — مشاركة آخر أغنية مع مستخدم\n\nمثال: .sa يا ليل\nsher@ahmd555\n\n🔒 تشغيل الأغاني للحسابات الموثقة.',
             '❤️ التفاعلات والصور والشبيه — 2\n━━━━━━━━━━━━\n👍 lk@كود — إعجاب\n❤️ lv@كود — حب\n👎 dl@كود — عدم إعجاب\n💬 cm@كود نص — تعليق\n🚨 report@كود نص — إبلاغ\n\nصورتي أو صورتك — بحث آمن عن صورة مناسبة لاسمك\n.صوره اسم_المستخدم — بحث آمن عن صورة المستخدم\nشبيه@اسم — بحث آمن عن الشبيه\nشبيهك@اسم — بحث آمن عن شبيهك\n\n📌 النتائج العامة من الإنترنت، مع تفعيل SafeSearch ومنع البحث عن الصور المخلة.',
         ],
         3: [
-            '🎮 A3 — الألعاب — 1: ضد البوت\n━━━━━━━━━━━━\n1. حجر/ورق/مقص — rock/paper/scissors\n2. استثمار — investment\n3. حظ — luck/chance\n4. عملة@وجه/كتابة — coin@heads/tails\n5. عجلة — wheel/roulette\n6. صندوق@1..3 — box/chest\n7. كوب@1..3 — cup\n8. وحش — monster\n9. بركان — volcano\n10. طائر — bird\n11. نجم — star\n12. طاولة — table\n13. اونو — uno\n📌 اكتب ns للقائمة التالية',
+            '🎮 A3 — الألعاب — 1: ضد البوت\n━━━━━━━━━━━━\n1. حجر/ورق/مقص — rock/paper/scissors\n2. استثمار — investment\n3. حظ — luck/chance\n4. عملة@وجه/كتابة — coin@heads/tails\n5. عجلة — wheel/roulette\n6. صندوق@1..3 — box/chest\n7. كوب@1..3 — cup\n8. وحش — monster\n9. بركان — volcano\n10. طائر — bird\n11. نجم — star\n12. طاولة — table\n13. اونو — uno\n📌 اكتب ns للقائمة التالية\n📚 أمر مستويات يعرض قوائم الألعاب من البداية',
             '🎮 A3 — الألعاب — 2: الرهان والحظ\n━━━━━━━━━━━━\n14. رهان@مبلغ — bet/wager\n15. مضاربة@مبلغ — duel\n16. حظي@مبلغ — my luck\n17. استثمار@مبلغ — investment\n18. حظ@مبلغ — luck@amount\n📌 حدد المبلغ بعد الاسم.',
             '🎮 A3 — الألعاب — 3: البنك والجوائز\n━━━━━━━━━━━━\n19. بنك مليون — bank million\n20. مليار — billion\n21. زرع@رمز — farm/crop@item\n22. فيس@اسم — face@name\n📌 زرع أو farm يعرض المحاصيل؛ 30 محصولاً كحد أقصى في كل قائمة، ثم ns للتالي. الأسماء العربية والإنجليزية مقبولة.',
             '🎮 A3 — الألعاب — 4: ألعاب الغرف\n━━━━━━━━━━━━\n23. ثعبان — snake/snakes and ladders\n24. لودو — ludo\n25. سنارة — fishing/fishing rod/snare\n26. برق — lightning\n27. ياقوت — ruby\n28. صدام — crash\n29. كاشف — detector/guess who\n📌 الألعاب التشاركية تتطلب لاعبين.',
@@ -16926,6 +16927,32 @@ class TalkinBot:
         # for commands that contain user arguments.
         game_low = low.replace("ة", "ه")
 
+        # Master-only room diagnostic: grant the next diamond type and show its image in-room.
+        if low in {"فحص الماس", "فحص الالماس", "فحص الألماس"}:
+            if not _is_master_name(sender_name):
+                self.send_room_text(room, "🔒 هذا الأمر مخصص للماستر فقط.")
+                return True
+            if not room:
+                self.send_private_text(sender_name, "📌 أرسل أمر فحص الماس داخل الغرفة ليظهر الرد والصورة فيها.")
+                return True
+            base = _public_base_url()
+            if not base:
+                self.send_room_text(room, "❌ لا يوجد رابط عام لصور الألماس. تحقق من PUBLIC_BASE_URL أو Railway Domain.")
+                return True
+            if any(not (ASSETS_DIR / item["image"]).is_file() for item in treasure_game.ITEMS.values() if item["diamond"]):
+                self.send_room_text(room, "❌ بعض صور الألماس غير موجودة في مجلد assets.")
+                return True
+            result = treasure_game.give_test_diamond(sender_name, sender_name)
+            image_url = f"{base}/assets/{result['image']}?check={uuid.uuid4().hex}"
+            try:
+                self._verify_public_media_url(image_url, "image")
+                self.send_room_text(room, f"💎 فحص الألماس: أُضيف إلى مخزونك {result['label']} (قيمة الاستبدال {result['points']:,} نقطة).")
+                if self.send_room_media(room, image_url, "image") is False:
+                    self.send_room_text(room, "⚠️ أُضيفت الألماسة لكن تعذر إرسال صورتها.")
+            except Exception as exc:
+                self.log("[GAME] diamond test image failed", repr(exc))
+                self.send_room_text(room, f"⚠️ أُضيفت {result['label']} إلى مخزونك، لكن تعذر إرسال الصورة.")
+            return True
         # Master-only diagnostic: send the current billion-game image privately
         # to the master, without publishing it in the room.
         if low in ("فحص صورة المليار", "فحص صوره المليار", "فحص_صورة_المليار"):
@@ -17343,6 +17370,13 @@ class TalkinBot:
                 self.send_private_text(sender, menu)
             elif room:
                 self.send_room_text(room, menu)
+            return True
+        if _body_low == "مستويات":
+            _key = (("__private__" if is_private else str(room)), _norm_user(sender))
+            self.help_pages[_key] = 3
+            self.help_page_part[_key] = 1
+            self.help_game_part[_key] = 1
+            self._send_help(room=room, private_to=sender if is_private else None, page=3, game_part=1)
             return True
         _m_public_help = re.fullmatch(r"a([1-6])", _body_low)
         if _m_public_help:

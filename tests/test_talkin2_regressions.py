@@ -2589,6 +2589,67 @@ class BotGameAndMusicRegressions(unittest.TestCase):
         self.assertEqual(bot.help_page_part[key], 2)
         self.assertEqual(sent[1][1].split("\n\n📌", 1)[0], bot_module._default_help_sections()[3][1])
 
+    def test_levels_command_opens_first_a3_page_and_initializes_ns_state(self):
+        bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
+        bot.help_pages = {}
+        bot.help_page_part = {}
+        bot.help_game_part = {}
+        bot._room_list_commands = lambda *_args: False
+        bot._send_help = lambda **kwargs: calls.append(kwargs)
+        bot._snake_command = lambda *_args: False
+        bot._ludo_command = lambda *_args: False
+        bot._handle_pending_bot_choice = lambda *_args: False
+        calls = []
+        self.assertTrue(bot._handle_management_command("North", "مستويات", "Player", is_private=False))
+        key = ("North", bot_module._norm_user("Player"))
+        self.assertEqual(bot.help_pages[key], 3)
+        self.assertEqual(bot.help_page_part[key], 1)
+        self.assertEqual(bot.help_game_part[key], 1)
+        self.assertEqual(calls, [{"room": "North", "private_to": None, "page": 3, "game_part": 1}])
+
+    def test_master_diamond_check_grants_rotating_item_and_sends_room_image(self):
+        bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
+        bot.stock_pending = {}
+        bot._snake_command = lambda *_args: False
+        bot._ludo_command = lambda *_args: False
+        bot._handle_pending_bot_choice = lambda *_args: False
+        bot._verify_public_media_url = lambda *_args: None
+        bot.log = lambda *_args: None
+        sent = []
+        bot.send_room_text = lambda room, text: sent.append(("text", room, text))
+        bot.send_room_media = lambda room, url, kind, duration=0: sent.append(("media", room, url, kind)) or True
+        diamond_results = [
+            {"ok": True, "label": "الألماس العادي", "image": "diamond_normal.png", "points": 100},
+            {"ok": True, "label": "الألماس الأزرق النادر", "image": "diamond_blue.png", "points": 250},
+        ]
+        self.assertTrue(bot_module._looks_like_bot_command("فحص الماس"))
+        with patch.object(bot_module, "_is_master_name", return_value=True), patch.object(
+            bot_module, "_public_base_url", return_value="https://example.test"
+        ), patch.object(bot_module.treasure_game, "give_test_diamond", side_effect=diamond_results
+        ):
+            self.assertTrue(bot.handle_game_command("North", "فحص الماس", "Master"))
+            self.assertTrue(bot.handle_game_command("North", "فحص الماس", "Master"))
+        media = [entry for entry in sent if entry[0] == "media"]
+        self.assertEqual(len(media), 2)
+        self.assertTrue(all(entry[1] == "North" and entry[3] == "image" for entry in media))
+        self.assertIn("diamond_normal.png", media[0][2])
+        self.assertIn("diamond_blue.png", media[1][2])
+
+    def test_diamond_check_rejects_non_master(self):
+        bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
+        bot.stock_pending = {}
+        bot._snake_command = lambda *_args: False
+        bot._ludo_command = lambda *_args: False
+        bot._handle_pending_bot_choice = lambda *_args: False
+        sent = []
+        bot.send_room_text = lambda room, text: sent.append((room, text))
+        with patch.object(bot_module, "_is_master_name", return_value=False), patch.object(
+            bot_module.treasure_game, "give_test_diamond"
+        ) as grant:
+            self.assertTrue(bot.handle_game_command("North", "فحص الماس", "Player"))
+        grant.assert_not_called()
+        self.assertTrue(sent and "مخصص للماستر" in sent[0][1])
+
     def test_normal_song_request_broadcasts_to_all_active_rooms(self):
         bot = bot_module.TalkinBot.__new__(bot_module.TalkinBot)
         bot.music_last = {}
